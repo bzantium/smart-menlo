@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Smart Menlo",
+  "version": "2.0",
+  "description": "Automatically redirects failed site connections to the Menlo Security URL.",
+  "permissions": [
+    "webNavigation",
+    "tabs",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Smart Menlo",
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  }
+}
