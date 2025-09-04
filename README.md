@@ -25,3 +25,6 @@ The extension also provides a simple toggle switch in the popup to enable or dis
 2.  Open Chrome and navigate to `chrome://extensions/`.
 3.  Enable "Developer mode" in the top right corner.
 4.  Click "Load unpacked" and select the cloned repository folder.
+
+---
+*These codes were vibe-coded using gemini-2.5-pro.*
