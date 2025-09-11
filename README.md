@@ -1,11 +1,10 @@
 # Smart Menlo
 
-<p align="center">
+<p align="left">
   <img src="https://img.shields.io/badge/Chrome-Extension-brightgreen.svg" alt="Chrome Extension">
   <img src="https://img.shields.io/badge/Manifest-V3-blue.svg" alt="Manifest V3">
   <img src="https://img.shields.io/badge/License-MIT-lightgrey.svg" alt="License: MIT">
 </p>
------
 
 ### The Problem
 
