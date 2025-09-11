@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Smart Menlo",
+  "version": "3.0",
+  "description": "접속에 실패한 사이트를 자동으로 Menlo Security URL로 리디렉션합니다.",
+  "permissions": [
+    "storage",
+    "tabs",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Smart Menlo",
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  }
+}

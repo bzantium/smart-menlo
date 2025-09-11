@@ -1,0 +1,187 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  width: 320px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+.container {
+  text-align: center;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.header img {
+  width: 32px;
+  height: 32px;
+  margin-right: 10px;
+}
+
+h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #d63328;
+}
+
+.content p {
+  font-size: 13px;
+  margin: 10px 0 20px;
+  line-height: 1.5;
+}
+
+.action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+#switchStatus {
+    margin-left: 15px;
+    font-size: 14px;
+    font-weight: bold;
+    min-width: 60px;
+    text-align: left;
+}
+
+.list-container {
+  margin-top: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.list-container h4 {
+  margin: 5px 0 10px;
+  font-size: 14px;
+  color: #333;
+}
+
+.list {
+  max-height: 150px;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.list-item:last-child {
+  border-bottom: none;
+}
+
+.list-item span {
+  flex-grow: 1;
+  cursor: pointer;
+}
+
+.list-item input {
+  flex-grow: 1;
+  border: 1px solid #ccc;
+  padding: 5px;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #d63328;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.list-action {
+  display: flex;
+  margin-top: 10px;
+}
+
+#newUrlInput {
+  flex-grow: 1;
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+#addUrlBtn {
+  background-color: #d63328;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+/* The switch - https://www.w3schools.com/howto/howto_css_switch.asp */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #d63328;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #d63328;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
