@@ -7,9 +7,9 @@ const loadForceMenloList = async () => {
   try {
     const data = await chrome.storage.local.get('forceMenloList');
     forceMenloList = data.forceMenloList || [];
-    console.log('[Smart Menlo] 강제 목록 로드:', forceMenloList);
+    console.log('[Smart Menlo] Force list loaded:', forceMenloList);
   } catch (error) {
-    console.log('[Smart Menlo] 강제 목록 로드 중 오류 발생:', error);
+    console.log('[Smart Menlo] Error loading force list:', error);
   }
 };
 
@@ -39,7 +39,7 @@ const isUrlForced = (url) => {
       }
     });
   } catch (error) {
-    console.log(`[Smart Menlo] URL 파싱 오류: ${url}`, error);
+    console.log(`[Smart Menlo] URL parsing error: ${url}`, error);
     return false;
   }
 };
@@ -76,7 +76,7 @@ const handleBeforeNavigate = (details) => {
       return;
     }
   } catch (error) {
-    console.log('[Smart Menlo] handleBeforeNavigate 처리 중 오류 발생:', error);
+    console.log('[Smart Menlo] Error in handleBeforeNavigate:', error);
   }
 };
 
@@ -86,11 +86,11 @@ const handleError = (details) => {
     if (frameId !== 0 || !url.startsWith('http') || url.startsWith(MENLO_PREFIX)) return;
     if (error === 'net::ERR_ABORTED') return;
     
-    console.log(`[Smart Menlo] 접속 실패(${error}). Menlo로 리디렉션: ${url}`);
+    console.log(`[Smart Menlo] Connection failed (${error}). Redirecting to Menlo: ${url}`);
     tabStates.set(tabId, true);
     chrome.tabs.update(tabId, { url: MENLO_PREFIX + url });
   } catch (e) {
-    console.log('[Smart Menlo] handleError 처리 중 오류 발생:', e);
+    console.log('[Smart Menlo] Error in handleError:', e);
   }
 };
 
