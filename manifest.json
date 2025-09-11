@@ -1,7 +1,7 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 1,
   "name": "Smart Menlo",
-  "version": "3.0",
+  "version": "1.0",
   "description": "접속에 실패한 사이트를 자동으로 Menlo Security URL로 리디렉션합니다.",
   "permissions": [
     "storage",
