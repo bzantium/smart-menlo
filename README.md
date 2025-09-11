@@ -1,9 +1,9 @@
 # Smart Menlo
 
 <p align="center">
-<img src="[https://img.shields.io/badge/Chrome-Extension-brightgreen.svg](https://www.google.com/search?q=https://img.shields.io/badge/Chrome-Extension-brightgreen.svg)" alt="Chrome Extension">
-<img src="[https://img.shields.io/badge/Manifest-V3-blue.svg](https://www.google.com/search?q=https://img.shields.io/badge/Manifest-V3-blue.svg)" alt="Manifest V3">
-<img src="[https://img.shields.io/badge/License-MIT-lightgrey.svg](https://www.google.com/search?q=https://img.shields.io/badge/License-MIT-lightgrey.svg)" alt="License: MIT">
+  <img src="https://img.shields.io/badge/Chrome-Extension-brightgreen.svg" alt="Chrome Extension">
+  <img src="https://img.shields.io/badge/Manifest-V3-blue.svg" alt="Manifest V3">
+  <img src="https://img.shields.io/badge/License-MIT-lightgrey.svg" alt="License: MIT">
 </p>
 -----
 
@@ -14,6 +14,16 @@ If you work in a corporate environment that uses Menlo Security, you're familiar
 ### The Solution: Smart Menlo 🚀
 
 **Smart Menlo** is an intelligent assistant that automates your entire Menlo Security workflow. It eliminates the manual steps of copying, pasting, and editing URLs, allowing you to browse seamlessly. It works in the background to make your protected browsing experience faster and more efficient.
+
+### Installation
+
+1.  Clone this repository to your local machine:
+    ```sh
+    git clone https://github.com/bzantium/smart-menlo.git
+    ```
+2.  Open Chrome and navigate to `chrome://extensions/`.
+3.  Enable **Developer mode** in the top-right corner.
+4.  Click **Load unpacked** and select the cloned repository folder.
 
 ### How It Works
 
@@ -47,16 +57,6 @@ This is the extension's most powerful feature, giving you full control. From the
 | :--- | :--- | :--- |
 | **Subdomain**<br>(No `/` in rule) | `notion.site` | Matches the domain and **any subdomain**.<br>- `https://www.notion.site` -> Redirects<br>- `https://bzantium.notion.site` -> Redirects |
 | **Path**<br>(Contains `/` in rule) | `huggingface.co/papers` | Matches URLs that **start with** that exact path.<br>- `https://huggingface.co/papers/2305.12345` -> Redirects<br>- `https://huggingface.co/models` -> **Does Not** Redirect |
-
-### Installation
-
-1.  Clone this repository to your local machine:
-    ```sh
-    git clone https://github.com/bzantium/smart-menlo.git
-    ```
-2.  Open Chrome and navigate to `chrome://extensions/`.
-3.  Enable **Developer mode** in the top-right corner.
-4.  Click **Load unpacked** and select the cloned repository folder.
 
 ### Troubleshooting
 
