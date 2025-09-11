@@ -5,16 +5,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const newUrlInput = document.getElementById('newUrlInput');
   const addUrlBtn = document.getElementById('addUrlBtn');
 
-  // 활성화/비활성화 관련 코드는 기존과 동일
-  chrome.storage.local.get('isEnabled', (data) => {
-    toggleSwitch.checked = typeof data.isEnabled === 'undefined' ? true : !!data.isEnabled;
-    updateStatusText(toggleSwitch.checked);
-  });
+  try {
+    chrome.storage.local.get('isEnabled', (data) => {
+      toggleSwitch.checked = typeof data.isEnabled === 'undefined' ? true : !!data.isEnabled;
+      updateStatusText(toggleSwitch.checked);
+    });
+  } catch (e) {
+    console.log('[Smart Menlo] 활성화 상태 로드 중 오류:', e);
+  }
 
   toggleSwitch.addEventListener('change', () => {
     const isEnabled = toggleSwitch.checked;
-    chrome.storage.local.set({ isEnabled: isEnabled });
-    updateStatusText(isEnabled);
+    try {
+      chrome.storage.local.set({ isEnabled: isEnabled });
+      updateStatusText(isEnabled);
+    } catch (e) {
+      console.log('[Smart Menlo] 활성화 상태 저장 중 오류:', e);
+    }
   });
 
   function updateStatusText(isEnabled) {
@@ -22,16 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
     switchStatus.style.color = isEnabled ? '#d63328' : '#888';
   }
 
-  // --- Force Menlo List 관련 로직 ---
-
   let forceMenloList = [];
 
-  /**
-   * 입력된 URL 패턴을 정리합니다.
-   * 1. http/https 프로토콜 제거
-   * 2. www. 접두사 제거
-   * 3. 마지막에 붙은 슬래시(/) 제거
-   */
   const sanitizePattern = (url) => {
     if (!url) return null;
     return url.trim()
@@ -41,10 +40,14 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const loadAndRenderList = () => {
-    chrome.storage.local.get('forceMenloList', (data) => {
-      forceMenloList = data.forceMenloList || [];
-      renderList();
-    });
+    try {
+      chrome.storage.local.get('forceMenloList', (data) => {
+        forceMenloList = data.forceMenloList || [];
+        renderList();
+      });
+    } catch(e) {
+      console.log('[Smart Menlo] 강제 목록 로드 중 오류:', e);
+    }
   };
 
   const renderList = () => {
@@ -69,19 +72,27 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const addUrl = () => {
-    const newPattern = sanitizePattern(newUrlInput.value);
-    if (newPattern && !forceMenloList.includes(newPattern)) {
-      forceMenloList.push(newPattern);
-      chrome.storage.local.set({ forceMenloList: forceMenloList }, () => {
-        newUrlInput.value = '';
-        renderList();
-      });
+    try {
+      const newPattern = sanitizePattern(newUrlInput.value);
+      if (newPattern && !forceMenloList.includes(newPattern)) {
+        forceMenloList.push(newPattern);
+        chrome.storage.local.set({ forceMenloList: forceMenloList }, () => {
+          newUrlInput.value = '';
+          renderList();
+        });
+      }
+    } catch(e) {
+      console.log('[Smart Menlo] URL 추가 중 오류:', e);
     }
   };
 
   const deleteUrl = (index) => {
-    forceMenloList.splice(index, 1);
-    chrome.storage.local.set({ forceMenloList: forceMenloList }, renderList);
+    try {
+      forceMenloList.splice(index, 1);
+      chrome.storage.local.set({ forceMenloList: forceMenloList }, renderList);
+    } catch(e) {
+      console.log('[Smart Menlo] URL 삭제 중 오류:', e);
+    }
   };
 
   const editUrl = (index, listItem) => {
@@ -96,11 +107,16 @@ document.addEventListener('DOMContentLoaded', () => {
     input.focus();
 
     const saveChanges = () => {
-      const newPattern = sanitizePattern(input.value);
-      if (newPattern && newPattern !== currentPattern && !forceMenloList.includes(newPattern)) {
-        forceMenloList[index] = newPattern;
-        chrome.storage.local.set({ forceMenloList: forceMenloList }, renderList);
-      } else {
+      try {
+        const newPattern = sanitizePattern(input.value);
+        if (newPattern && newPattern !== currentPattern && !forceMenloList.includes(newPattern)) {
+          forceMenloList[index] = newPattern;
+          chrome.storage.local.set({ forceMenloList: forceMenloList }, renderList);
+        } else {
+          renderList();
+        }
+      } catch(e) {
+        console.log('[Smart Menlo] URL 수정 중 오류:', e);
         renderList();
       }
     };
