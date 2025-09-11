@@ -1,0 +1,58 @@
+{
+    "appName": {
+      "message": "智能Menlo",
+      "description": "The name of the application"
+    },
+    "appDesc": {
+      "message": "自动将连接失败的网站重定向到Menlo Security URL。",
+      "description": "The description of the application"
+    },
+    "popupTitle": {
+      "message": "智能Menlo",
+      "description": "Title of the popup"
+    },
+    "popupHeader": {
+      "message": "智能Menlo",
+      "description": "Header of the popup"
+    },
+    "popupDesc": {
+      "message": "当网站连接失败时，通过Menlo Security自动重新连接。",
+      "description": "Description in the popup"
+    },
+    "enable": {
+      "message": "启用",
+      "description": "Enable switch status"
+    },
+    "disable": {
+      "message": "禁用",
+      "description": "Disable switch status"
+    },
+    "forceMenloListTitle": {
+      "message": "始终使用Menlo打开的URL列表",
+      "description": "Title for the force menlo list"
+    },
+    "newUrlInputPlaceholder": {
+      "message": "输入网址",
+      "description": "Placeholder for the new URL input"
+    },
+    "addUrlBtn": {
+      "message": "添加",
+      "description": "Add button text"
+    },
+    "langEn": {
+      "message": "英语",
+      "description": "English language"
+    },
+    "langKo": {
+      "message": "韩语",
+      "description": "Korean language"
+    },
+    "langJa": {
+      "message": "日语",
+      "description": "Japanese language"
+    },
+    "langZh": {
+      "message": "中文",
+      "description": "Chinese language"
+    }
+}

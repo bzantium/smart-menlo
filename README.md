@@ -1,68 +1,63 @@
 # Smart Menlo
 
-Smart Menlo는 웹사이트 접속에 실패했을 때, 해당 사이트를 자동으로 Menlo Security URL로 리디렉션해주는 Chrome 확장 프로그램입니다.
+<p align="center">
+<img src="[https://img.shields.io/badge/Chrome-Extension-brightgreen.svg](https://www.google.com/search?q=https://img.shields.io/badge/Chrome-Extension-brightgreen.svg)" alt="Chrome Extension">
+<img src="[https://img.shields.io/badge/Manifest-V3-blue.svg](https://www.google.com/search?q=https://img.shields.io/badge/Manifest-V3-blue.svg)" alt="Manifest V3">
+<img src="[https://img.shields.io/badge/License-MIT-lightgrey.svg](https://www.google.com/search?q=https://img.shields.io/badge/License-MIT-lightgrey.svg)" alt="License: MIT">
+</p>
+-----
 
-## Menlo Security란?
+### The Problem
 
-Menlo Security는 웹 및 이메일 트래픽을 안전한 원격 브라우저에서 격리하여 조직을 사이버 공격으로부터 보호하는 클라우드 기반 보안 플랫폼입니다. 이를 통해 멀웨어나 기타 위협이 최종 사용자의 장치에 도달하는 것을 방지합니다. 사용자가 차단되었거나 안전하지 않다고 판단되는 웹사이트에 접속하려고 하면, Menlo Security가 요청을 가로채 안전하게 렌더링된 버전의 페이지를 사용자에게 표시합니다.
+If you work in a corporate environment that uses Menlo Security, you're familiar with the routine: you try to visit a site, it gets blocked, and then you manually copy the URL to open it through Menlo. Furthermore, when you receive a Menlo link from a colleague, you can't access the original site directly without first stripping the prefix. These small hurdles disrupt your workflow and add up over time.
 
-## 누구를 위한 확장 프로그램인가요?
+### The Solution: Smart Menlo 🚀
 
-이 확장 프로그램은 조직의 보안 정책으로 인해 차단되는 웹사이트를 자주 접하며, 이를 해결하기 위해 Menlo Security를 사용하는 사용자를 위한 것입니다. Smart Menlo는 리디렉션 과정을 자동화하여 사용자의 시간을 절약하고 브라우징 경험을 개선합니다.
+**Smart Menlo** is an intelligent assistant that automates your entire Menlo Security workflow. It eliminates the manual steps of copying, pasting, and editing URLs, allowing you to browse seamlessly. It works in the background to make your protected browsing experience faster and more efficient.
 
-## 설치 방법
+### How It Works
 
-1.  이 저장소를 복제(Clone)합니다:
-    ```
+Smart Menlo has three core automatic behaviors designed to make your life easier.
+
+#### 1\. Automatic Fallback on Error
+
+This is the most fundamental feature. When you try to access a website and the connection fails with a network error, Smart Menlo instantly catches it and automatically re-opens the page through Menlo Security.
+
+  * **Code Insight**: This is handled by the `handleError` function in `background.js`, which listens for web navigation errors like `net::ERR_CONNECTION_TIMED_OUT`.
+
+#### 2\. Intelligent Link Handling
+
+When you click a link that's already a Menlo URL (e.g., `https://safe.menlosecurity.com/https://github.com`), Smart Menlo performs a clever check:
+
+1.  It first **strips the Menlo prefix** and tries to connect you directly to the original URL (`https://github.com`).
+2.  If the direct connection succeeds, great\! You're on the original site.
+3.  If the direct connection **fails**, Smart Menlo's "Automatic Fallback" feature kicks in and redirects you back to the secure Menlo Security version.
+
+This ensures you always try the fastest, most direct route first without sacrificing security.
+
+  * **Code Insight**: The prefix stripping happens in the `handleBeforeNavigate` function. This logic is skipped for URLs you've added to the Forced Redirection List.
+
+#### 3\. The Forced Redirection List
+
+This is the extension's most powerful feature, giving you full control. From the popup, you can add rules to ensure certain sites **always** open through Menlo Security, skipping any direct connection attempts. The matching is flexible, with two rule types:
+
+  * **Code Insight**: The `isUrlForced` function in `background.js` checks if a URL pattern contains a `/`. This determines whether to use subdomain or path matching.
+
+| Rule Type | Example Rule in List | Behavior |
+| :--- | :--- | :--- |
+| **Subdomain**<br>(No `/` in rule) | `notion.site` | Matches the domain and **any subdomain**.<br>- `https://www.notion.site` -> Redirects<br>- `https://bzantium.notion.site` -> Redirects |
+| **Path**<br>(Contains `/` in rule) | `huggingface.co/papers` | Matches URLs that **start with** that exact path.<br>- `https://huggingface.co/papers/2305.12345` -> Redirects<br>- `https://huggingface.co/models` -> **Does Not** Redirect |
+
+### Installation
+
+1.  Clone this repository to your local machine:
+    ```sh
     git clone https://github.com/bzantium/smart-menlo.git
     ```
-2.  Chrome을 열고 주소창에 `chrome://extensions/`를 입력하여 확장 프로그램 관리 페이지로 이동합니다.
-3.  페이지 오른쪽 상단의 '개발자 모드'를 활성화합니다.
-4.  '압축해제된 확장 프로그램 로드' 버튼을 클릭하고, 1번에서 복제한 저장소 폴더를 선택합니다.
+2.  Open Chrome and navigate to `chrome://extensions/`.
+3.  Enable **Developer mode** in the top-right corner.
+4.  Click **Load unpacked** and select the cloned repository folder.
 
-## 주요 기능 및 사용법
+### Troubleshooting
 
-> **💡 툴바에 고정하여 사용하세요\!**
->
-> 로드 후 확장 해당 프로그램의 '세부정보'을 클릭하여 '툴바에 고정'을 활성화하면, 툴바의 아이콘을 클릭하여 간편하게 활성화/비활성화 및 URL 목록을 관리할 수 있습니다.
-
-### 1\. 자동 리디렉션 (기본 기능)
-
-웹사이트 접속 시 네트워크 오류 등으로 인해 실패하면, Smart Menlo가 이를 감지하여 자동으로 해당 사이트의 Menlo Security 버전으로 리디렉션합니다. 이미 Menlo Security URL로 변환된 링크(예: 메신저로 공유받은 링크)를 여는 경우, Smart Menlo가 자동으로 Menlo prefix(`https://safe.menlosecurity.com/`)를 제거하고 원본 주소로 먼저 접속을 시도합니다. 만약 직접 접속에 실패하면, 원래의 자동 리디렉션 기능이 동작하여 다시 Menlo Security URL로 접속합니다.
-
-> **❗ 중요**: 이 기능은 **'항상 Menlo로 접속할 URL 목록'에 등록되지 않은 사이트**에만 적용됩니다. 목록에 등록된 사이트를 Menlo 없이 접속하고 싶다면, 확장 프로그램의 기능을 잠시 비활성화하거나 목록에서 해당 주소를 제거해야 합니다.
-
-### 2\. 강제 리디렉션 목록 (핵심 기능)
-
-팝업 창에서 특정 웹사이트 주소를 목록에 추가하여, 접속 실패 여부와 관계없이 **항상 Menlo Security를 통해 접속**하도록 강제할 수 있습니다. 규칙은 두 가지 방식으로 동작합니다.
-
-#### 경로가 없는 주소 (서브도메인 규칙)
-
-목록에 `notion.site`와 같이 경로가 없는 호스트 이름만 등록하면, 해당 호스트 이름과 **모든 서브도메인**에 규칙이 적용됩니다.
-
-  * **예시**: 목록에 `notion.site`를 추가하면
-      * `https://bzantium.notion.site` → **리디렉션 됨**
-      * `https://www.notion.site` → **리디렉션 됨**
-
-#### 경로가 있는 주소 (특정 경로 규칙)
-
-목록에 `huggingface.co/papers`와 같이 특정 경로를 포함한 주소를 등록하면, **정확히 해당 경로(및 그 하위 경로)에만** 규칙이 적용됩니다. 다른 경로에는 영향을 주지 않습니다.
-
-  * **예시**: 목록에 `huggingface.co/papers`를 추가하면
-      * `https://huggingface.co/papers` → **리디렉션 됨**
-      * `https://huggingface.co/papers/2305.12345` → **리디렉션 됨**
-      * `https://huggingface.co/models` → 리디렉션 안 됨
-
-### 3\. 목록 관리 방법
-
-  * **추가**: 팝업 창 하단의 입력란에 주소를 입력하고 '추가' 버튼을 누릅니다. (`www.`는 저장 시 자동으로 제거됩니다.)
-  * **수정**: 목록에 있는 주소를 클릭하면 수정 모드로 변경됩니다. 수정 후 엔터를 누르면 저장됩니다.
-  * **삭제**: 목록에 있는 주소 오른쪽에 있는 `×` 버튼을 클릭합니다.
-
-### 4\. 기능 활성화/비활성화
-
-팝업 창 상단의 토글 스위치를 사용하여 확장 프로그램의 모든 자동 리디렉션 기능을 쉽게 켜고 끌 수 있습니다.
-
-### 5\. 문제가 발생했을 때
-
-해당 프로그램의 기능이 제대로 적용되지 않는 것처럼 보일 경우, **확장 프로그램 관리 페이지(`chrome://extensions`)에서 확장 프로그램을 새로고침(🔄)하거나 활성화 버튼을 껐다가 다시 켜면** 대부분의 문제가 해결됩니다.
+If the extension doesn't seem to be working, try refreshing it from the `chrome://extensions` page or toggling it off and on again. This resolves most issues.

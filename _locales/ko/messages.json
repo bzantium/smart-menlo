@@ -1,0 +1,58 @@
+{
+    "appName": {
+      "message": "Smart Menlo",
+      "description": "The name of the application"
+    },
+    "appDesc": {
+      "message": "접속에 실패한 사이트를 자동으로 Menlo Security URL로 리디렉션합니다.",
+      "description": "The description of the application"
+    },
+    "popupTitle": {
+      "message": "Smart Menlo",
+      "description": "Title of the popup"
+    },
+    "popupHeader": {
+      "message": "Smart Menlo",
+      "description": "Header of the popup"
+    },
+    "popupDesc": {
+      "message": "웹사이트 접속 실패 시, 자동으로 Menlo Security를 통해 재접속합니다.",
+      "description": "Description in the popup"
+    },
+    "enable": {
+      "message": "활성화",
+      "description": "Enable switch status"
+    },
+    "disable": {
+      "message": "비활성화",
+      "description": "Disable switch status"
+    },
+    "forceMenloListTitle": {
+      "message": "항상 Menlo로 접속할 URL 목록",
+      "description": "Title for the force menlo list"
+    },
+    "newUrlInputPlaceholder": {
+      "message": "URL을 입력하세요",
+      "description": "Placeholder for the new URL input"
+    },
+    "addUrlBtn": {
+      "message": "추가",
+      "description": "Add button text"
+    },
+    "langEn": {
+      "message": "영어",
+      "description": "English language"
+    },
+    "langKo": {
+      "message": "한국어",
+      "description": "Korean language"
+    },
+    "langJa": {
+      "message": "일본어",
+      "description": "Japanese language"
+    },
+    "langZh": {
+      "message": "중국어",
+      "description": "Chinese language"
+    }
+  }

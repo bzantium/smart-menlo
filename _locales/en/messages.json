@@ -1,0 +1,58 @@
+{
+    "appName": {
+      "message": "Smart Menlo",
+      "description": "The name of the application"
+    },
+    "appDesc": {
+      "message": "Automatically redirects failed site connections to the Menlo Security URL.",
+      "description": "The description of the application"
+    },
+    "popupTitle": {
+      "message": "Smart Menlo",
+      "description": "Title of the popup"
+    },
+    "popupHeader": {
+      "message": "Smart Menlo",
+      "description": "Header of the popup"
+    },
+    "popupDesc": {
+      "message": "When a website fails to connect, it automatically reconnects through Menlo Security.",
+      "description": "Description in the popup"
+    },
+    "enable": {
+      "message": "Enable",
+      "description": "Enable switch status"
+    },
+    "disable": {
+      "message": "Disable",
+      "description": "Disable switch status"
+    },
+    "forceMenloListTitle": {
+      "message": "Always Open with Menlo URL List",
+      "description": "Title for the force menlo list"
+    },
+    "newUrlInputPlaceholder": {
+      "message": "Enter URL",
+      "description": "Placeholder for the new URL input"
+    },
+    "addUrlBtn": {
+      "message": "Add",
+      "description": "Add button text"
+    },
+    "langEn": {
+      "message": "English",
+      "description": "English language"
+    },
+    "langKo": {
+      "message": "Korean",
+      "description": "Korean language"
+    },
+    "langJa": {
+      "message": "Japanese",
+      "description": "Japanese language"
+    },
+    "langZh": {
+      "message": "Chinese",
+      "description": "Chinese language"
+    }
+  }

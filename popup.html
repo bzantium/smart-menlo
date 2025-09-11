@@ -1,34 +1,43 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Smart Menlo</title>
+  <title>__MSG_popupTitle__</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
     <div class="header">
       <img src="assets/icon48.png" alt="Smart Menlo Icon">
-      <h3>Smart Menlo</h3>
+      <h3 data-i18n="popupHeader">__MSG_popupHeader__</h3>
     </div>
     <div class="content">
-      <p>웹사이트 접속 실패 시, 자동으로 Menlo Security를 통해 재접속합니다.</p>
+      <p data-i18n="popupDesc">__MSG_popupDesc__</p>
     </div>
     <div class="action">
       <label class="switch">
         <input type="checkbox" id="toggleSwitch">
         <span class="slider round"></span>
       </label>
-      <span id="switchStatus">비활성화</span>
+      <span id="switchStatus"></span>
     </div>
 
     <div class="list-container">
-      <h4>항상 Menlo로 접속할 URL 목록</h4>
+      <h4 data-i18n="forceMenloListTitle">__MSG_forceMenloListTitle__</h4>
       <div id="forceMenloList" class="list"></div>
       <div class="list-action">
-        <input type="text" id="newUrlInput" placeholder="URL을 입력하세요">
-        <button id="addUrlBtn">추가</button>
+        <input type="text" id="newUrlInput" data-i18n-placeholder="newUrlInputPlaceholder">
+        <button id="addUrlBtn" data-i18n="addUrlBtn">__MSG_addUrlBtn__</button>
       </div>
+    </div>
+
+    <div class="footer">
+      <select id="language-select">
+        <option value="en" data-i18n="langEn">__MSG_langEn__</option>
+        <option value="ko" data-i18n="langKo">__MSG_langKo__</option>
+        <option value="ja" data-i18n="langJa">__MSG_langJa__</option>
+        <option value="zh" data-i18n="langZh">__MSG_langZh__</option>
+      </select>
     </div>
 
   </div>

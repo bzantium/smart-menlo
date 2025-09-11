@@ -4,15 +4,62 @@ document.addEventListener('DOMContentLoaded', () => {
   const forceMenloListDiv = document.getElementById('forceMenloList');
   const newUrlInput = document.getElementById('newUrlInput');
   const addUrlBtn = document.getElementById('addUrlBtn');
+  const languageSelect = document.getElementById('language-select');
 
-  try {
-    chrome.storage.local.get('isEnabled', (data) => {
-      toggleSwitch.checked = typeof data.isEnabled === 'undefined' ? true : !!data.isEnabled;
-      updateStatusText(toggleSwitch.checked);
+  let translations = {}; // This will hold our loaded translation messages
+
+  // Helper function to get a string from our loaded translations
+  const i18n = (key) => {
+    return translations[key] ? translations[key].message : `__${key}__`;
+  };
+
+  // Fetches the correct messages.json file based on the selected language
+  const loadTranslations = async (locale) => {
+    try {
+      const url = chrome.runtime.getURL(`_locales/${locale}/messages.json`);
+      const response = await fetch(url);
+      if (!response.ok) {
+        // If the language file doesn't exist, fall back to English
+        console.warn(`[Smart Menlo] Locale file for '${locale}' not found. Falling back to 'en'.`);
+        const fallbackUrl = chrome.runtime.getURL(`_locales/en/messages.json`);
+        const fallbackResponse = await fetch(fallbackUrl);
+        translations = await fallbackResponse.json();
+      } else {
+        translations = await response.json();
+      }
+    } catch (error) {
+      console.error('[Smart Menlo] Error loading translation file:', error);
+    }
+  };
+
+  // Applies the loaded translations to all elements in the popup
+  const applyTranslations = () => {
+    document.querySelectorAll('[data-i18n]').forEach(elem => {
+      const key = elem.getAttribute('data-i18n');
+      elem.textContent = i18n(key);
     });
-  } catch (e) {
-    console.log('[Smart Menlo] 활성화 상태 로드 중 오류:', e);
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(elem => {
+      const key = elem.getAttribute('data-i18n-placeholder');
+      elem.placeholder = i18n(key);
+    });
+    // Re-apply translation for the dynamic status text
+    updateStatusText(toggleSwitch.checked);
+  };
+
+  // Updates the status text next to the toggle switch
+  function updateStatusText(isEnabled) {
+    switchStatus.textContent = isEnabled ? i18n('enable') : i18n('disable');
+    switchStatus.style.color = isEnabled ? '#d63328' : '#888';
   }
+  
+  // --- Event Listeners and Initial Setup ---
+
+  languageSelect.addEventListener('change', async (event) => {
+    const selectedLang = event.target.value;
+    await chrome.storage.local.set({ language: selectedLang });
+    await loadTranslations(selectedLang);
+    applyTranslations();
+  });
 
   toggleSwitch.addEventListener('change', () => {
     const isEnabled = toggleSwitch.checked;
@@ -20,14 +67,11 @@ document.addEventListener('DOMContentLoaded', () => {
       chrome.storage.local.set({ isEnabled: isEnabled });
       updateStatusText(isEnabled);
     } catch (e) {
-      console.log('[Smart Menlo] 활성화 상태 저장 중 오류:', e);
+      console.log('[Smart Menlo] Error saving enabled state:', e);
     }
   });
 
-  function updateStatusText(isEnabled) {
-    switchStatus.textContent = isEnabled ? '활성화' : '비활성화';
-    switchStatus.style.color = isEnabled ? '#d63328' : '#888';
-  }
+  // --- Logic for the URL list (no changes needed here) ---
 
   let forceMenloList = [];
 
@@ -46,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderList();
       });
     } catch(e) {
-      console.log('[Smart Menlo] 강제 목록 로드 중 오류:', e);
+      console.log('[Smart Menlo] Error loading force list:', e);
     }
   };
 
@@ -55,16 +99,13 @@ document.addEventListener('DOMContentLoaded', () => {
     forceMenloList.forEach((pattern, index) => {
       const listItem = document.createElement('div');
       listItem.className = 'list-item';
-
       const urlSpan = document.createElement('span');
       urlSpan.textContent = pattern;
       urlSpan.addEventListener('click', () => editUrl(index, listItem));
-
       const deleteBtn = document.createElement('button');
       deleteBtn.className = 'delete-btn';
       deleteBtn.textContent = '×';
       deleteBtn.addEventListener('click', () => deleteUrl(index));
-
       listItem.appendChild(urlSpan);
       listItem.appendChild(deleteBtn);
       forceMenloListDiv.appendChild(listItem);
@@ -82,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
     } catch(e) {
-      console.log('[Smart Menlo] URL 추가 중 오류:', e);
+      console.log('[Smart Menlo] Error adding URL:', e);
     }
   };
 
@@ -91,21 +132,18 @@ document.addEventListener('DOMContentLoaded', () => {
       forceMenloList.splice(index, 1);
       chrome.storage.local.set({ forceMenloList: forceMenloList }, renderList);
     } catch(e) {
-      console.log('[Smart Menlo] URL 삭제 중 오류:', e);
+      console.log('[Smart Menlo] Error deleting URL:', e);
     }
   };
 
   const editUrl = (index, listItem) => {
     const urlSpan = listItem.querySelector('span');
     const currentPattern = urlSpan.textContent;
-
     const input = document.createElement('input');
     input.type = 'text';
     input.value = currentPattern;
-    
     listItem.replaceChild(input, urlSpan);
     input.focus();
-
     const saveChanges = () => {
       try {
         const newPattern = sanitizePattern(input.value);
@@ -116,11 +154,10 @@ document.addEventListener('DOMContentLoaded', () => {
           renderList();
         }
       } catch(e) {
-        console.log('[Smart Menlo] URL 수정 중 오류:', e);
+        console.log('[Smart Menlo] Error editing URL:', e);
         renderList();
       }
     };
-    
     input.addEventListener('blur', saveChanges);
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') input.blur();
@@ -133,5 +170,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') addUrl();
   });
 
-  loadAndRenderList();
+  // --- Main function to initialize the popup ---
+
+  const initializePopup = async () => {
+    const data = await chrome.storage.local.get(['language', 'isEnabled']);
+    
+    // 1. Set language (saved > browser > default 'en')
+    const lang = data.language || chrome.i18n.getUILanguage().split('-')[0] || 'en';
+    languageSelect.value = lang;
+    
+    // 2. Load and apply translations
+    await loadTranslations(lang);
+    applyTranslations();
+    
+    // 3. Set toggle switch state
+    toggleSwitch.checked = typeof data.isEnabled === 'undefined' ? true : !!data.isEnabled;
+    updateStatusText(toggleSwitch.checked);
+
+    // 4. Load the URL list
+    loadAndRenderList();
+  };
+
+  initializePopup();
 });
