@@ -27,11 +27,17 @@ document.addEventListener('DOMContentLoaded', () => {
   let forceMenloList = [];
 
   /**
-   * 입력된 URL 패턴을 정리합니다 (프로토콜 및 마지막 슬래시 제거).
+   * 입력된 URL 패턴을 정리합니다.
+   * 1. http/https 프로토콜 제거
+   * 2. www. 접두사 제거
+   * 3. 마지막에 붙은 슬래시(/) 제거
    */
   const sanitizePattern = (url) => {
     if (!url) return null;
-    return url.trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+    return url.trim()
+              .replace(/^https?:\/\//, '')
+              .replace(/^www\./, '')
+              .replace(/\/$/, '');
   };
 
   const loadAndRenderList = () => {
