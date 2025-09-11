@@ -46,8 +46,6 @@ Smart Menlo has three core automatic behaviors designed to make your life easier
 
 This is the most fundamental feature. When you try to access a website and the connection fails with a network error, Smart Menlo instantly catches it and automatically re-opens the page through Menlo Security.
 
-  * **Code Insight**: This is handled by the `handleError` function in `background.js`, which listens for web navigation errors like `net::ERR_CONNECTION_TIMED_OUT`.
-
 #### 2\. Intelligent Link Handling
 
 When you click a link that's already a Menlo URL (e.g., `https://safe.menlosecurity.com/https://github.com`), Smart Menlo performs a clever check:
@@ -57,8 +55,6 @@ When you click a link that's already a Menlo URL (e.g., `https://safe.menlosecur
 3.  If the direct connection **fails**, Smart Menlo's "Automatic Fallback" feature kicks in and redirects you back to the secure Menlo Security version.
 
 This ensures you always try the fastest, most direct route first without sacrificing security.
-
-  * **Code Insight**: The prefix stripping happens in the `handleBeforeNavigate` function. This logic is skipped for URLs you've added to the Forced Redirection List.
 
 #### 3\. The Forced Redirection List
 
