@@ -14,7 +14,7 @@ Menlo Security는 웹 및 이메일 트래픽을 안전한 원격 브라우저�
 
 1.  이 저장소를 복제(Clone)합니다:
     ```
-    git clone https://github.daumkakao.com/ryan-u/smart-menlo.git
+    git clone https://github.com/bzantium/smart-menlo.git
     ```
 2.  Chrome을 열고 주소창에 `chrome://extensions/`를 입력하여 확장 프로그램 관리 페이지로 이동합니다.
 3.  페이지 오른쪽 상단의 '개발자 모드'를 활성화합니다.
