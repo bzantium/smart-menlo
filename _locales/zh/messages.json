@@ -1,6 +1,6 @@
 {
     "appName": {
-      "message": "智能Menlo",
+      "message": "Smart Menlo",
       "description": "The name of the application"
     },
     "appDesc": {
@@ -8,11 +8,11 @@
       "description": "The description of the application"
     },
     "popupTitle": {
-      "message": "智能Menlo",
+      "message": "Smart Menlo",
       "description": "Title of the popup"
     },
     "popupHeader": {
-      "message": "智能Menlo",
+      "message": "Smart Menlo",
       "description": "Header of the popup"
     },
     "popupDesc": {
@@ -55,4 +55,4 @@
       "message": "中文",
       "description": "Chinese language"
     }
-}
+  }
