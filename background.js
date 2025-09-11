@@ -7,9 +7,13 @@ let forceMenloList = [];
  * 저장소에서 최신 강제 목록을 불러와 메모리에 저장합니다.
  */
 const loadForceMenloList = async () => {
-  const data = await chrome.storage.local.get('forceMenloList');
-  forceMenloList = data.forceMenloList || [];
-  console.log('[Smart Menlo] 강제 목록 로드:', forceMenloList);
+  try {
+    const data = await chrome.storage.local.get('forceMenloList');
+    forceMenloList = data.forceMenloList || [];
+    console.log('[Smart Menlo] 강제 목록 로드:', forceMenloList);
+  } catch (error) {
+    console.log('[Smart Menlo] 강제 목록 로드 중 오류 발생:', error);
+  }
 };
 
 /**
@@ -18,30 +22,36 @@ const loadForceMenloList = async () => {
  * @returns {boolean} 일치 여부
  */
 const isUrlForced = (url) => {
-  const currentUrl = new URL(url);
-  const currentHostname = currentUrl.hostname;
-  const urlWithoutProtocol = url.replace(/^https?:\/\//, '');
+  // 📌 1. 오류 처리 추가: 유효하지 않은 URL로 인한 스크립트 중단을 방지합니다.
+  if (!url || !url.startsWith('http')) {
+    return false;
+  }
 
-  return forceMenloList.some(pattern => {
-    // 1. 경로가 포함된 규칙 (예: 'linkedin.com/feed')
-    if (pattern.includes('/')) {
-      const check = (targetUrl, p) => {
-        if (targetUrl.startsWith(p)) {
-          // 패턴과 정확히 일치하거나, 그 뒤에 /, ?, #가 오는 경우만 참으로 인정
-          const charAfterPattern = targetUrl[p.length];
-          return charAfterPattern === undefined || ['/', '?', '#'].includes(charAfterPattern);
-        }
-        return false;
-      };
-      // 'www.'가 있거나 없는 경우 모두를 확인
-      return check(urlWithoutProtocol, pattern) ||
-             (urlWithoutProtocol.startsWith('www.') && check(urlWithoutProtocol.substring(4), pattern));
-    }
-    // 2. 경로가 없는 규칙 (호스트 및 서브도메인 규칙)
-    else {
-      return currentHostname === pattern || currentHostname.endsWith('.' + pattern);
-    }
-  });
+  try {
+    const currentUrl = new URL(url);
+    const currentHostname = currentUrl.hostname;
+    const urlWithoutProtocol = url.replace(/^https?:\/\//, '');
+
+    return forceMenloList.some(pattern => {
+      if (pattern.includes('/')) {
+        const check = (targetUrl, p) => {
+          if (targetUrl.startsWith(p)) {
+            const charAfterPattern = targetUrl[p.length];
+            return charAfterPattern === undefined || ['/', '?', '#'].includes(charAfterPattern);
+          }
+          return false;
+        };
+        return check(urlWithoutProtocol, pattern) ||
+               (urlWithoutProtocol.startsWith('www.') && check(urlWithoutProtocol.substring(4), pattern));
+      } else {
+        return currentHostname === pattern || currentHostname.endsWith('.' + pattern);
+      }
+    });
+  } catch (error) {
+    // 📌 2. 오류 처리 추가: URL 파싱 중 예외가 발생해도 false를 반환하고 계속 작동합니다.
+    console.log(`[Smart Menlo] URL 파싱 오류: ${url}`, error);
+    return false;
+  }
 };
 
 
@@ -49,41 +59,35 @@ const isUrlForced = (url) => {
  * 웹 탐색 이벤트를 처리하는 핵심 핸들러입니다.
  */
 const handleBeforeNavigate = (details) => {
-  if (details.frameId !== 0) return;
+  // 📌 3. 오류 처리 추가: 리디렉션 로직 전체를 감싸 예기치 않은 오류에도 확장 프로그램이 멈추지 않도록 합니다.
+  try {
+    if (details.frameId !== 0) return;
 
-  const { tabId, url } = details;
+    const { tabId, url } = details;
 
-  if (tabStates.get(tabId)) {
-    tabStates.delete(tabId);
-    return;
-  }
-
-  // --- 로직 분기 ---
-
-  // 1. 현재 URL이 Menlo URL인 경우
-  if (url.startsWith(MENLO_PREFIX)) {
-    const originalUrlString = url.substring(MENLO_PREFIX.length);
-
-    // 원본 URL이 "강제 목록"에 포함되는지 확인합니다.
-    if (isUrlForced(originalUrlString)) {
-      // 목록에 있으므로 Menlo 접속을 그대로 유지합니다.
-      console.log(`[Smart Menlo] 강제 목록 URL(${originalUrlString})이므로 Menlo 접속을 유지합니다.`);
-    } else {
-      // 📌 이 부분이 바로 사용자가 말씀하신 핵심 로직입니다.
-      // "강제 목록"에 없으므로, Menlo prefix를 제거하고 원본 주소로 다시 접속을 시도합니다.
-      console.log(`[Smart Menlo] 등록되지 않은 Menlo URL 감지. 원본(${originalUrlString})으로 재접속 시도.`);
-      tabStates.set(tabId, true);
-      chrome.tabs.update(tabId, { url: originalUrlString });
+    if (tabStates.get(tabId)) {
+      tabStates.delete(tabId);
+      return;
     }
-    return;
-  }
 
-  // 2. 현재 URL이 "강제 목록"에 해당하여 Menlo로 보내야 하는 경우
-  if (isUrlForced(url)) {
-    console.log(`[Smart Menlo] 강제 목록 URL(${url}) 감지. Menlo로 리디렉션합니다.`);
-    tabStates.set(tabId, true);
-    chrome.tabs.update(tabId, { url: MENLO_PREFIX + url });
-    return;
+    if (url.startsWith(MENLO_PREFIX)) {
+      const originalUrlString = url.substring(MENLO_PREFIX.length);
+      if (isUrlForced(originalUrlString)) {
+        // 목록에 있으므로 Menlo 접속 유지
+      } else {
+        tabStates.set(tabId, true);
+        chrome.tabs.update(tabId, { url: originalUrlString });
+      }
+      return;
+    }
+
+    if (isUrlForced(url)) {
+      tabStates.set(tabId, true);
+      chrome.tabs.update(tabId, { url: MENLO_PREFIX + url });
+      return;
+    }
+  } catch (error) {
+    console.log('[Smart Menlo] handleBeforeNavigate 처리 중 오류 발생:', error);
   }
 };
 
@@ -91,13 +95,18 @@ const handleBeforeNavigate = (details) => {
  * 웹 페이지 접속 오류 발생 시 Menlo로 리디렉션합니다.
  */
 const handleError = (details) => {
-  const { tabId, url, error, frameId } = details;
-  if (frameId !== 0 || !url.startsWith('http') || url.startsWith(MENLO_PREFIX)) return;
-  if (error === 'net::ERR_ABORTED') return;
-  
-  console.log(`[Smart Menlo] 접속 실패(${error}). Menlo로 리디렉션: ${url}`);
-  tabStates.set(tabId, true);
-  chrome.tabs.update(tabId, { url: MENLO_PREFIX + url });
+  // 📌 4. 오류 처리 추가: 오류 처리 함수 자체의 안정성을 높입니다.
+  try {
+    const { tabId, url, error, frameId } = details;
+    if (frameId !== 0 || !url.startsWith('http') || url.startsWith(MENLO_PREFIX)) return;
+    if (error === 'net::ERR_ABORTED') return;
+    
+    console.log(`[Smart Menlo] 접속 실패(${error}). Menlo로 리디렉션: ${url}`);
+    tabStates.set(tabId, true);
+    chrome.tabs.update(tabId, { url: MENLO_PREFIX + url });
+  } catch (e) {
+    console.log('[Smart Menlo] handleError 처리 중 오류 발생:', e);
+  }
 };
 
 /**
