@@ -46,12 +46,12 @@ Menlo Security는 웹 및 이메일 트래픽을 안전한 원격 브라우저�
 
 #### 경로가 있는 주소 (특정 경로 규칙)
 
-목록에 `linkedin.com/feed`와 같이 특정 경로를 포함한 주소를 등록하면, **정확히 해당 경로(및 그 하위 경로)에만** 규칙이 적용됩니다. 다른 경로에는 영향을 주지 않습니다.
+목록에 `huggingface.co/papers`와 같이 특정 경로를 포함한 주소를 등록하면, **정확히 해당 경로(및 그 하위 경로)에만** 규칙이 적용됩니다. 다른 경로에는 영향을 주지 않습니다.
 
-  * **예시**: 목록에 `linkedin.com/feed`를 추가하면
-      * `https://www.linkedin.com/feed` → **리디렉션 됨**
-      * `https://www.linkedin.com/feed/update/123` → **리디렉션 됨**
-      * `https://www.linkedin.com/company/ringle` → 리디렉션 안 됨
+  * **예시**: 목록에 `huggingface.co/papers`를 추가하면
+      * `https://huggingface.co/papers` → **리디렉션 됨**
+      * `https://huggingface.co/papers/2305.12345` → **리디렉션 됨**
+      * `https://huggingface.co/models` → 리디렉션 안 됨
 
 ### 3\. 목록 관리 방법
 
