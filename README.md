@@ -41,7 +41,7 @@ Menlo Security는 웹 및 이메일 트래픽을 안전한 원격 브라우저�
 목록에 `notion.site`와 같이 경로가 없는 호스트 이름만 등록하면, 해당 호스트 이름과 **모든 서브도메인**에 규칙이 적용됩니다.
 
   * **예시**: 목록에 `notion.site`를 추가하면
-      * `https://doohae.notion.site` → **리디렉션 됨**
+      * `https://bzantium.notion.site` → **리디렉션 됨**
       * `https://www.notion.site` → **리디렉션 됨**
 
 #### 경로가 있는 주소 (특정 경로 규칙)
