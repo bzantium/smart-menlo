@@ -60,8 +60,6 @@ This ensures you always try the fastest, most direct route first without sacrifi
 
 This is the extension's most powerful feature, giving you full control. From the popup, you can add rules to ensure certain sites **always** open through Menlo Security, skipping any direct connection attempts. The matching is flexible, with two rule types:
 
-  * **Code Insight**: The `isUrlForced` function in `background.js` checks if a URL pattern contains a `/`. This determines whether to use subdomain or path matching.
-
 | Rule Type | Example Rule in List | Behavior |
 | :--- | :--- | :--- |
 | **Subdomain**<br>(No `/` in rule) | `notion.site` | Matches the domain and **any subdomain**.<br>- `https://www.notion.site` -> Redirects<br>- `https://bzantium.notion.site` -> Redirects |
