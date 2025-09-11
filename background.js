@@ -57,7 +57,7 @@ const handleBeforeNavigate = (details) => {
     }
 
     if (url.startsWith(MENLO_PREFIX)) {
-      if (url.startsWith("https://safe.menlosecurity.com/account")) {
+      if (url === "https://safe.menlosecurity.com" || url === "https://safe.menlosecurity.com/" || url.startsWith("https://safe.menlosecurity.com/account")) {
         return;
       }
 
