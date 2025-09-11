@@ -1,10 +1,24 @@
-# Smart Menlo
 
-<p align="left">
-  <img src="https://img.shields.io/badge/Chrome-Extension-brightgreen.svg" alt="Chrome Extension">
-  <img src="https://img.shields.io/badge/Manifest-V3-blue.svg" alt="Manifest V3">
-  <img src="https://img.shields.io/badge/License-MIT-lightgrey.svg" alt="License: MIT">
-</p>
+
+<h1 align="center">
+  <img src="assets/icon128.png" alt="Smart Menlo 로고" style="width: 32px; height: 32px;"> Smart Menlo
+</h1>
+
+<div align="center" style="line-height: 1.5;">
+  <img alt="Chrome Extension" src="https://img.shields.io/badge/Chrome-Extension-brightgreen.svg">
+  <img alt="Manifest V3" src="https://img.shields.io/badge/Manifest-V3-blue.svg">
+  <a href="LICENSE" target="_blank"><img alt="License" src="https://img.shields.io/badge/License-MIT-lightgrey.svg"></a>
+  <br>
+  <a href="https://github.com/bzantium/smart-menlo" target="_blank"><img alt="GitHub Repo" src="https://img.shields.io/badge/View_Source-GitHub-181717?logo=github"></a>
+</div>
+
+<div align="center">
+  <a href="https://www.readme-i18n.com/bzantium/smart-menlo?lang=en">English</a> |
+  <a href="https://www.readme-i18n.com/bzantium/smart-menlo?lang=ko">한국어</a> |
+  <a href="https://www.readme-i18n.com/bzantium/smart-menlo?lang=ja">日本語</a> |
+  <a href="https://www.readme-i18n.com/bzantium/smart-menlo?lang=zh">中文</a>
+</div>
+
 
 ### The Problem
 
