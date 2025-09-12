@@ -30,7 +30,7 @@ If you work in a corporate environment that uses Menlo Security, you're familiar
 
 ### 🚧 Development Status
 
-This project is in active development. While it's designed to be a reliable daily tool, you may encounter occasional bugs as new features are added and refined. Your feedback is invaluable - if you find an issue or have a suggestion, please [open an issue](https://www.google.com/search?q=https://github.com/bzantium/smart-menlo/issues)!
+This project is in active development. While it's designed to be a reliable daily tool, you may encounter occasional bugs as new features are added and refined. Your feedback is invaluable - if you find an issue or have a suggestion, please [open an issue](https://github.com/bzantium/smart-menlo/issues)!
 
 ### Installation
 
