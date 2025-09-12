@@ -6,48 +6,22 @@ const error = (...args) => {
   console.error(`[${new Date().toLocaleTimeString()}]`, ...args);
 };
 
-log('[Smart Menlo] Service Worker started.');
+log('[Smart Menlo] Service Worker script evaluating.');
 
 const MENLO_PREFIX = "https://safe.menlosecurity.com/";
 let forceMenloList = [];
-
+let isEnabled = true;
 const KEEPALIVE_ALARM_NAME = 'smart-menlo-keepalive';
-
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.alarms.create(KEEPALIVE_ALARM_NAME, {
-    periodInMinutes: 1
-  });
-  log('[Smart Menlo] Keep-alive alarm created.');
-  initialize();
-});
-
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === KEEPALIVE_ALARM_NAME) {
-    log('[Smart Menlo] Keep-alive alarm fired. Service worker is active.');
-  }
-});
-
-const loadForceMenloList = async () => {
-  try {
-    const data = await chrome.storage.local.get('forceMenloList');
-    forceMenloList = data.forceMenloList || [];
-    log('[Smart Menlo] Force list loaded:', forceMenloList);
-  } catch (e) {
-    error('[Smart Menlo] Error loading force list:', e);
-  }
-};
 
 const isUrlForced = (url) => {
   if (!url || !url.startsWith('http')) {
     log('[Smart Menlo] isUrlForced: URL is invalid or not HTTP/HTTPS.', url);
     return false;
   }
-
   try {
     const currentUrl = new URL(url);
     const currentHostname = currentUrl.hostname;
     const urlWithoutProtocol = url.replace(/^https?:\/\//, '');
-
     const isForced = forceMenloList.some(pattern => {
       if (pattern.includes('/')) {
         const check = (targetUrl, p) => {
@@ -57,8 +31,7 @@ const isUrlForced = (url) => {
           }
           return false;
         };
-        const isMatch = check(urlWithoutProtocol, pattern) ||
-               (urlWithoutProtocol.startsWith('www.') && check(urlWithoutProtocol.substring(4), pattern));
+        const isMatch = check(urlWithoutProtocol, pattern) || (urlWithoutProtocol.startsWith('www.') && check(urlWithoutProtocol.substring(4), pattern));
         if (isMatch) log(`[Smart Menlo] isUrlForced: URL matched path pattern '${pattern}'. URL: ${url}`);
         return isMatch;
       } else {
@@ -75,28 +48,28 @@ const isUrlForced = (url) => {
 };
 
 const handleBeforeNavigate = async (details) => {
-  log('[Smart Menlo] onBeforeNavigate event triggered for URL:', details.url);
-
   if (details.frameId !== 0) {
     log('[Smart Menlo] Skipping navigation for non-main frame:', details.frameId);
     return;
   }
 
-  const { tabId, url } = details;
+  if (!isEnabled) {
+    log('[Smart Menlo] Extension is disabled, skipping handleBeforeNavigate.');
+    return;
+  }
 
+  log('[Smart Menlo] onBeforeNavigate event triggered for URL:', details.url);
+  const { tabId, url } = details;
   try {
     const tabState = await chrome.storage.session.get(tabId.toString());
-
     if (tabState[tabId.toString()]) {
       log(`[Smart Menlo] Tab ${tabId} has a session flag, removing it and allowing navigation.`);
       await chrome.storage.session.remove(tabId.toString());
       return;
     }
-
     if (url.startsWith(MENLO_PREFIX)) {
       log('[Smart Menlo] Detected Menlo URL:', url);
       const pathAfterPrefix = url.substring(MENLO_PREFIX.length);
-
       if (pathAfterPrefix.startsWith('http://') || pathAfterPrefix.startsWith('https://')) {
         const originalUrlString = pathAfterPrefix;
         log('[Smart Menlo] Extracted original URL:', originalUrlString);
@@ -105,12 +78,11 @@ const handleBeforeNavigate = async (details) => {
           await chrome.storage.session.set({ [tabId.toString()]: true });
           chrome.tabs.update(tabId, { url: originalUrlString });
         } else {
-            log('[Smart Menlo] Original URL is in the force list, not redirecting from Menlo.');
+          log('[Smart Menlo] Original URL is in the force list, not redirecting from Menlo.');
         }
       }
       return;
     }
-
     if (isUrlForced(url)) {
       log(`[Smart Menlo] URL is in force list. Redirecting tab ${tabId} to Menlo.`);
       await chrome.storage.session.set({ [tabId.toString()]: true });
@@ -122,30 +94,29 @@ const handleBeforeNavigate = async (details) => {
 };
 
 const handleError = async (details) => {
+  if (!isEnabled) {
+    return;
+  }
   const { tabId, url, error: err, frameId } = details;
-
   log(`[Smart Menlo] onErrorOccurred event triggered for URL: ${url} with error: ${err}`);
 
   if (frameId !== 0) {
     log('[Smart Menlo] Skipping error handling for non-main frame:', frameId);
     return;
   }
-
   if (!url.startsWith('http')) {
-      log('[Smart Menlo] Skipping error handling for non-HTTP/HTTPS URL.');
-      return;
+    log('[Smart Menlo] Skipping error handling for non-HTTP/HTTPS URL.');
+    return;
+  }
+  if (url.startsWith(MENLO_PREFIX)) {
+    log('[Smart Menlo] Skipping error handling for Menlo URL.');
+    return;
+  }
+  if (err === 'net::ERR_ABORTED') {
+    log('[Smart Menlo] Skipping error handling for net::ERR_ABORTED.');
+    return;
   }
 
-  if (url.startsWith(MENLO_PREFIX)) {
-      log('[Smart Menlo] Skipping error handling for Menlo URL.');
-      return;
-  }
-  
-  if (err === 'net::ERR_ABORTED') {
-      log('[Smart Menlo] Skipping error handling for net::ERR_ABORTED.');
-      return;
-  }
-  
   try {
     log(`[Smart Menlo] Connection failed (${err}). Redirecting to Menlo: ${url}`);
     await chrome.storage.session.set({ [tabId.toString()]: true });
@@ -155,50 +126,56 @@ const handleError = async (details) => {
   }
 };
 
-const updateListeners = (isEnabled) => {
-  log(`[Smart Menlo] updateListeners called with isEnabled: ${isEnabled}`);
-  chrome.webNavigation.onBeforeNavigate.removeListener(handleBeforeNavigate);
-  chrome.webNavigation.onErrorOccurred.removeListener(handleError);
+chrome.runtime.onInstalled.addListener(() => {
+  log('[Smart Menlo] Extension installed or updated.');
+  chrome.alarms.create(KEEPALIVE_ALARM_NAME, { periodInMinutes: 1 });
+  log('[Smart Menlo] Keep-alive alarm created.');
+  chrome.storage.local.get('isEnabled', (data) => {
+    if (typeof data.isEnabled === 'undefined') {
+      chrome.storage.local.set({ isEnabled: true });
+      log('[Smart Menlo] isEnabled not set, setting to true.');
+    }
+  });
+});
 
-  if (isEnabled) {
-    log('[Smart Menlo] Adding webNavigation listeners.');
-    chrome.webNavigation.onBeforeNavigate.addListener(handleBeforeNavigate);
-    chrome.webNavigation.onErrorOccurred.addListener(handleError, { url: [{ schemes: ['http', 'https'] }] });
-  } else {
-      log('[Smart Menlo] Removing webNavigation listeners.');
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === KEEPALIVE_ALARM_NAME) {
+    log('[Smart Menlo] Keep-alive alarm fired. Service worker is active.');
   }
-};
+});
 
-const initialize = async () => {
-  log('[Smart Menlo] Initializing extension.');
-  await loadForceMenloList();
-  const data = await chrome.storage.local.get('isEnabled');
-  const isEnabled = data.isEnabled !== false;
-  log(`[Smart Menlo] Extension is ${isEnabled ? 'enabled' : 'disabled'}.`);
-  if (typeof data.isEnabled === 'undefined') {
-    log('[Smart Menlo] isEnabled not set, setting to true.');
-    await chrome.storage.local.set({ isEnabled: true });
-  }
-  updateListeners(isEnabled);
-};
-
-chrome.runtime.onStartup.addListener(initialize);
-
-chrome.storage.onChanged.addListener(async (changes, namespace) => {
+chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace === 'local') {
     log('[Smart Menlo] storage.local onChanged event detected:', changes);
     if (changes.isEnabled) {
-        log(`[Smart Menlo] isEnabled changed to: ${changes.isEnabled.newValue}`);
-      updateListeners(changes.isEnabled.newValue);
+      isEnabled = changes.isEnabled.newValue;
+      log(`[Smart Menlo] isEnabled state updated to: ${isEnabled}`);
     }
     if (changes.forceMenloList) {
-        log('[Smart Menlo] forceMenloList changed, reloading list.');
-      await loadForceMenloList();
+      forceMenloList = changes.forceMenloList.newValue || [];
+      log('[Smart Menlo] forceMenloList reloaded:', forceMenloList);
     }
   }
 });
 
 chrome.tabs.onRemoved.addListener((tabId) => {
-    log(`[Smart Menlo] Tab ${tabId} removed, clearing session data.`);
+  log(`[Smart Menlo] Tab ${tabId} removed, clearing session data.`);
   chrome.storage.session.remove(tabId.toString()).catch(e => error(`[Smart Menlo] Error clearing session data for tab ${tabId}:`, e));
 });
+
+const loadInitialState = async () => {
+  log('[Smart Menlo] Loading initial state.');
+  try {
+    const data = await chrome.storage.local.get(['forceMenloList', 'isEnabled']);
+    forceMenloList = data.forceMenloList || [];
+    isEnabled = data.isEnabled !== false;
+    log('[Smart Menlo] State loaded:', { isEnabled, forceMenloList });
+  } catch (e) {
+    error('[Smart Menlo] Error loading initial state:', e);
+  }
+};
+
+chrome.webNavigation.onBeforeNavigate.addListener(handleBeforeNavigate);
+chrome.webNavigation.onErrorOccurred.addListener(handleError, { url: [{ schemes: ['http', 'https'] }] });
+
+loadInitialState();
