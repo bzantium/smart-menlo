@@ -1,6 +1,5 @@
 const MENLO_PREFIX = "https://safe.menlosecurity.com/";
 
-const tabStates = new Map();
 let forceMenloList = [];
 
 const loadForceMenloList = async () => {
@@ -17,7 +16,6 @@ const isUrlForced = (url) => {
   if (!url || !url.startsWith('http')) {
     return false;
   }
-
   try {
     const currentUrl = new URL(url);
     const currentHostname = currentUrl.hostname;
@@ -44,63 +42,61 @@ const isUrlForced = (url) => {
   }
 };
 
-
-const handleBeforeNavigate = (details) => {
-  try {
-    if (details.frameId !== 0) return;
-
-    const { tabId, url } = details;
-
-    if (tabStates.get(tabId)) {
-      tabStates.delete(tabId);
-      return;
-    }
-
-    if (url.startsWith(MENLO_PREFIX)) {
-      if (url === "https://safe.menlosecurity.com" || url === "https://safe.menlosecurity.com/" || url.startsWith("https://safe.menlosecurity.com/account")) {
-        return;
-      }
-
-      const originalUrlString = url.substring(MENLO_PREFIX.length);
-      if (isUrlForced(originalUrlString)) {
-      } else {
-        tabStates.set(tabId, true);
-        chrome.tabs.update(tabId, { url: originalUrlString });
-      }
-      return;
-    }
-
-    if (isUrlForced(url)) {
-      tabStates.set(tabId, true);
-      chrome.tabs.update(tabId, { url: MENLO_PREFIX + url });
-      return;
-    }
-  } catch (error) {
-    console.log('[Smart Menlo] Error in handleBeforeNavigate:', error);
+const handleBeforeRequest = (details) => {
+  if (details.type !== 'main_frame' || details.method !== 'GET') {
+    return {};
   }
+
+  const { url } = details;
+
+  if (url.startsWith(MENLO_PREFIX)) {
+    const pathAfterPrefix = url.substring(MENLO_PREFIX.length);
+
+    if (!pathAfterPrefix.startsWith('http')) {
+      return {};
+    }
+
+    const originalUrlString = pathAfterPrefix;
+    if (!isUrlForced(originalUrlString)) {
+      console.log(`[Smart Menlo] Redirecting from Menlo to: ${originalUrlString}`);
+      return { redirectUrl: originalUrlString };
+    }
+  }
+  else if (url.startsWith('http')) {
+    if (isUrlForced(url)) {
+      const menloUrl = MENLO_PREFIX + url;
+      console.log(`[Smart Menlo] Forcing redirect through Menlo: ${menloUrl}`);
+      return { redirectUrl: menloUrl };
+    }
+  }
+
+  return {};
 };
 
 const handleError = (details) => {
-  try {
     const { tabId, url, error, frameId } = details;
     if (frameId !== 0 || !url.startsWith('http') || url.startsWith(MENLO_PREFIX)) return;
     if (error === 'net::ERR_ABORTED') return;
-    
-    console.log(`[Smart Menlo] Connection failed (${error}). Redirecting to Menlo: ${url}`);
-    tabStates.set(tabId, true);
-    chrome.tabs.update(tabId, { url: MENLO_PREFIX + url });
-  } catch (e) {
-    console.log('[Smart Menlo] Error in handleError:', e);
-  }
+
+    try {
+        console.log(`[Smart Menlo] Connection failed (${error}). Redirecting to Menlo: ${url}`);
+        chrome.tabs.update(tabId, { url: MENLO_PREFIX + url });
+    } catch (e) {
+        console.log('[Smart Menlo] Error in handleError:', e);
+    }
 };
 
 const updateListeners = (isEnabled) => {
-  chrome.webNavigation.onBeforeNavigate.removeListener(handleBeforeNavigate);
+  chrome.webRequest.onBeforeRequest.removeListener(handleBeforeRequest);
   chrome.webNavigation.onErrorOccurred.removeListener(handleError);
 
   if (isEnabled) {
-    chrome.webNavigation.onBeforeNavigate.addListener(handleBeforeNavigate);
-    chrome.webNavigation.onErrorOccurred.addListener(handleError);
+    chrome.webRequest.onBeforeRequest.addListener(
+      handleBeforeRequest,
+      { urls: ["<all_urls>"] },
+      ["blocking"]
+    );
+    chrome.webNavigation.onErrorOccurred.addListener(handleError, { urls: ["<all_urls>"] });
   }
 };
 
@@ -126,8 +122,4 @@ chrome.storage.onChanged.addListener(async (changes, namespace) => {
       await loadForceMenloList();
     }
   }
-});
-
-chrome.tabs.onRemoved.addListener((tabId) => {
-  tabStates.delete(tabId);
 });

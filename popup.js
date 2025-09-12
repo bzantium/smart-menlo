@@ -6,20 +6,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const addUrlBtn = document.getElementById('addUrlBtn');
   const languageSelect = document.getElementById('language-select');
 
-  let translations = {}; // This will hold our loaded translation messages
+  let translations = {};
 
-  // Helper function to get a string from our loaded translations
   const i18n = (key) => {
     return translations[key] ? translations[key].message : `__${key}__`;
   };
 
-  // Fetches the correct messages.json file based on the selected language
   const loadTranslations = async (locale) => {
     try {
       const url = chrome.runtime.getURL(`_locales/${locale}/messages.json`);
       const response = await fetch(url);
       if (!response.ok) {
-        // If the language file doesn't exist, fall back to English
         console.warn(`[Smart Menlo] Locale file for '${locale}' not found. Falling back to 'en'.`);
         const fallbackUrl = chrome.runtime.getURL(`_locales/en/messages.json`);
         const fallbackResponse = await fetch(fallbackUrl);
@@ -32,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Applies the loaded translations to all elements in the popup
   const applyTranslations = () => {
     document.querySelectorAll('[data-i18n]').forEach(elem => {
       const key = elem.getAttribute('data-i18n');
@@ -42,17 +38,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const key = elem.getAttribute('data-i18n-placeholder');
       elem.placeholder = i18n(key);
     });
-    // Re-apply translation for the dynamic status text
     updateStatusText(toggleSwitch.checked);
   };
 
-  // Updates the status text next to the toggle switch
   function updateStatusText(isEnabled) {
     switchStatus.textContent = isEnabled ? i18n('enable') : i18n('disable');
     switchStatus.style.color = isEnabled ? '#d63328' : '#888';
   }
   
-  // --- Event Listeners and Initial Setup ---
 
   languageSelect.addEventListener('change', async (event) => {
     const selectedLang = event.target.value;
@@ -71,7 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- Logic for the URL list (no changes needed here) ---
 
   let forceMenloList = [];
 
@@ -170,24 +162,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') addUrl();
   });
 
-  // --- Main function to initialize the popup ---
 
   const initializePopup = async () => {
     const data = await chrome.storage.local.get(['language', 'isEnabled']);
     
-    // 1. Set language (saved > browser > default 'en')
     const lang = data.language || chrome.i18n.getUILanguage().split('-')[0] || 'en';
     languageSelect.value = lang;
     
-    // 2. Load and apply translations
     await loadTranslations(lang);
     applyTranslations();
     
-    // 3. Set toggle switch state
     toggleSwitch.checked = typeof data.isEnabled === 'undefined' ? true : !!data.isEnabled;
     updateStatusText(toggleSwitch.checked);
 
-    // 4. Load the URL list
     loadAndRenderList();
   };
 
