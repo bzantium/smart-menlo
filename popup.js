@@ -14,18 +14,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const loadTranslations = async (locale) => {
     try {
-      const url = chrome.runtime.getURL(`_locales/${locale}/messages.json`);
-      const response = await fetch(url);
+      let url = chrome.runtime.getURL(`_locales/${locale}/messages.json`);
+      let response = await fetch(url);
       if (!response.ok) {
         console.warn(`[Smart Menlo] Locale file for '${locale}' not found. Falling back to 'en'.`);
-        const fallbackUrl = chrome.runtime.getURL(`_locales/en/messages.json`);
-        const fallbackResponse = await fetch(fallbackUrl);
-        translations = await fallbackResponse.json();
-      } else {
-        translations = await response.json();
+        url = chrome.runtime.getURL(`_locales/en/messages.json`);
+        response = await fetch(url);
       }
+      translations = await response.json();
     } catch (error) {
       console.error('[Smart Menlo] Error loading translation file:', error);
+      const fallbackUrl = chrome.runtime.getURL(`_locales/en/messages.json`);
+      const fallbackResponse = await fetch(fallbackUrl);
+      translations = await fallbackResponse.json();
     }
   };
 
@@ -45,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
     switchStatus.textContent = isEnabled ? i18n('enable') : i18n('disable');
     switchStatus.style.color = isEnabled ? '#d63328' : '#888';
   }
-  
 
   languageSelect.addEventListener('change', async (event) => {
     const selectedLang = event.target.value;
@@ -56,14 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   toggleSwitch.addEventListener('change', () => {
     const isEnabled = toggleSwitch.checked;
-    try {
-      chrome.storage.local.set({ isEnabled: isEnabled });
-      updateStatusText(isEnabled);
-    } catch (e) {
-      console.log('[Smart Menlo] Error saving enabled state:', e);
-    }
+    chrome.storage.local.set({ isEnabled: isEnabled });
+    updateStatusText(isEnabled);
   });
-
 
   let forceMenloList = [];
 
@@ -75,14 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
               .replace(/\/$/, '');
   };
 
-  const loadAndRenderList = () => {
+  const loadAndRenderList = async () => {
     try {
-      chrome.storage.local.get('forceMenloList', (data) => {
-        forceMenloList = data.forceMenloList || [];
-        renderList();
-      });
+      const data = await chrome.storage.local.get('forceMenloList');
+      forceMenloList = data.forceMenloList || [];
+      renderList();
     } catch(e) {
-      console.log('[Smart Menlo] Error loading force list:', e);
+      console.error('[Smart Menlo] Error loading force list:', e);
     }
   };
 
@@ -91,40 +85,45 @@ document.addEventListener('DOMContentLoaded', () => {
     forceMenloList.forEach((pattern, index) => {
       const listItem = document.createElement('div');
       listItem.className = 'list-item';
+
       const urlSpan = document.createElement('span');
       urlSpan.textContent = pattern;
+      urlSpan.title = pattern;
       urlSpan.addEventListener('click', () => editUrl(index, listItem));
+
       const deleteBtn = document.createElement('button');
       deleteBtn.className = 'delete-btn';
       deleteBtn.textContent = '×';
+      deleteBtn.title = i18n('deleteUrlTitle');
       deleteBtn.addEventListener('click', () => deleteUrl(index));
+
       listItem.appendChild(urlSpan);
       listItem.appendChild(deleteBtn);
       forceMenloListDiv.appendChild(listItem);
     });
   };
 
-  const addUrl = () => {
+  const addUrl = async () => {
     try {
       const newPattern = sanitizePattern(newUrlInput.value);
       if (newPattern && !forceMenloList.includes(newPattern)) {
         forceMenloList.push(newPattern);
-        chrome.storage.local.set({ forceMenloList: forceMenloList }, () => {
-          newUrlInput.value = '';
-          renderList();
-        });
+        await chrome.storage.local.set({ forceMenloList: forceMenloList });
+        newUrlInput.value = '';
+        renderList();
       }
     } catch(e) {
-      console.log('[Smart Menlo] Error adding URL:', e);
+      console.error('[Smart Menlo] Error adding URL:', e);
     }
   };
 
-  const deleteUrl = (index) => {
+  const deleteUrl = async (index) => {
     try {
       forceMenloList.splice(index, 1);
-      chrome.storage.local.set({ forceMenloList: forceMenloList }, renderList);
+      await chrome.storage.local.set({ forceMenloList: forceMenloList });
+      renderList();
     } catch(e) {
-      console.log('[Smart Menlo] Error deleting URL:', e);
+      console.error('[Smart Menlo] Error deleting URL:', e);
     }
   };
 
@@ -136,17 +135,17 @@ document.addEventListener('DOMContentLoaded', () => {
     input.value = currentPattern;
     listItem.replaceChild(input, urlSpan);
     input.focus();
-    const saveChanges = () => {
+
+    const saveChanges = async () => {
       try {
         const newPattern = sanitizePattern(input.value);
         if (newPattern && newPattern !== currentPattern && !forceMenloList.includes(newPattern)) {
           forceMenloList[index] = newPattern;
-          chrome.storage.local.set({ forceMenloList: forceMenloList }, renderList);
-        } else {
-          renderList();
+          await chrome.storage.local.set({ forceMenloList: forceMenloList });
         }
       } catch(e) {
-        console.log('[Smart Menlo] Error editing URL:', e);
+        console.error('[Smart Menlo] Error editing URL:', e);
+      } finally {
         renderList();
       }
     };
@@ -165,16 +164,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const initializePopup = async () => {
     const data = await chrome.storage.local.get(['language', 'isEnabled']);
     
-
     const lang = data.language || chrome.i18n.getUILanguage().split('-')[0] || 'en';
     languageSelect.value = lang;
 
+    toggleSwitch.checked = data.isEnabled !== false;
+
     await loadTranslations(lang);
     applyTranslations();
-
-    toggleSwitch.checked = typeof data.isEnabled === 'undefined' ? true : !!data.isEnabled;
-    updateStatusText(toggleSwitch.checked);
-    loadAndRenderList();
+    
+    await loadAndRenderList();
   };
 
   initializePopup();

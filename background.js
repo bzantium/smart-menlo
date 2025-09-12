@@ -1,6 +1,5 @@
 const MENLO_PREFIX = "https://safe.menlosecurity.com/";
 
-const tabStates = new Map();
 let forceMenloList = [];
 
 const loadForceMenloList = async () => {
@@ -9,7 +8,7 @@ const loadForceMenloList = async () => {
     forceMenloList = data.forceMenloList || [];
     console.log('[Smart Menlo] Force list loaded:', forceMenloList);
   } catch (error) {
-    console.log('[Smart Menlo] Error loading force list:', error);
+    console.error('[Smart Menlo] Error loading force list:', error);
   }
 };
 
@@ -39,58 +38,59 @@ const isUrlForced = (url) => {
       }
     });
   } catch (error) {
-    console.log(`[Smart Menlo] URL parsing error: ${url}`, error);
+    console.error(`[Smart Menlo] URL parsing error: ${url}`, error);
     return false;
   }
 };
 
+const handleBeforeNavigate = async (details) => {
+  if (details.frameId !== 0) return;
 
-const handleBeforeNavigate = (details) => {
+  const { tabId, url } = details;
+
   try {
-    if (details.frameId !== 0) return;
+    const tabState = await chrome.storage.session.get(tabId.toString());
 
-    const { tabId, url } = details;
-
-    if (tabStates.get(tabId)) {
-      tabStates.delete(tabId);
+    if (tabState[tabId.toString()]) {
+      await chrome.storage.session.remove(tabId.toString());
       return;
     }
 
     if (url.startsWith(MENLO_PREFIX)) {
-      if (url === "https://safe.menlosecurity.com" || url === "https://safe.menlosecurity.com/" || url.startsWith("https://safe.menlosecurity.com/account")) {
-        return;
-      }
+      const pathAfterPrefix = url.substring(MENLO_PREFIX.length);
 
-      const originalUrlString = url.substring(MENLO_PREFIX.length);
-      if (isUrlForced(originalUrlString)) {
-      } else {
-        tabStates.set(tabId, true);
-        chrome.tabs.update(tabId, { url: originalUrlString });
+      if (pathAfterPrefix.startsWith('http://') || pathAfterPrefix.startsWith('https://')) {
+        const originalUrlString = pathAfterPrefix;
+        if (!isUrlForced(originalUrlString)) {
+          await chrome.storage.session.set({ [tabId.toString()]: true });
+          chrome.tabs.update(tabId, { url: originalUrlString });
+        }
       }
       return;
     }
 
     if (isUrlForced(url)) {
-      tabStates.set(tabId, true);
+      await chrome.storage.session.set({ [tabId.toString()]: true });
       chrome.tabs.update(tabId, { url: MENLO_PREFIX + url });
-      return;
     }
   } catch (error) {
-    console.log('[Smart Menlo] Error in handleBeforeNavigate:', error);
+    console.error('[Smart Menlo] Error in handleBeforeNavigate:', error);
   }
 };
 
-const handleError = (details) => {
+const handleError = async (details) => {
+  const { tabId, url, error, frameId } = details;
+  
+  if (frameId !== 0 || !url.startsWith('http') || url.startsWith(MENLO_PREFIX)) return;
+  
+  if (error === 'net::ERR_ABORTED') return;
+  
   try {
-    const { tabId, url, error, frameId } = details;
-    if (frameId !== 0 || !url.startsWith('http') || url.startsWith(MENLO_PREFIX)) return;
-    if (error === 'net::ERR_ABORTED') return;
-    
     console.log(`[Smart Menlo] Connection failed (${error}). Redirecting to Menlo: ${url}`);
-    tabStates.set(tabId, true);
+    await chrome.storage.session.set({ [tabId.toString()]: true });
     chrome.tabs.update(tabId, { url: MENLO_PREFIX + url });
   } catch (e) {
-    console.log('[Smart Menlo] Error in handleError:', e);
+    console.error('[Smart Menlo] Error in handleError:', e);
   }
 };
 
@@ -100,14 +100,14 @@ const updateListeners = (isEnabled) => {
 
   if (isEnabled) {
     chrome.webNavigation.onBeforeNavigate.addListener(handleBeforeNavigate);
-    chrome.webNavigation.onErrorOccurred.addListener(handleError);
+    chrome.webNavigation.onErrorOccurred.addListener(handleError, { url: [{ schemes: ['http', 'https'] }] });
   }
 };
 
 const initialize = async () => {
   await loadForceMenloList();
   const data = await chrome.storage.local.get('isEnabled');
-  const isEnabled = typeof data.isEnabled === 'undefined' ? true : !!data.isEnabled;
+  const isEnabled = data.isEnabled !== false;
   if (typeof data.isEnabled === 'undefined') {
     await chrome.storage.local.set({ isEnabled: true });
   }
@@ -129,5 +129,5 @@ chrome.storage.onChanged.addListener(async (changes, namespace) => {
 });
 
 chrome.tabs.onRemoved.addListener((tabId) => {
-  tabStates.delete(tabId);
+  chrome.storage.session.remove(tabId.toString()).catch(e => console.error(e));
 });
