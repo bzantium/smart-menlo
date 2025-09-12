@@ -28,6 +28,10 @@ If you work in a corporate environment that uses Menlo Security, you're familiar
 
 **Smart Menlo** is an intelligent assistant that automates your entire Menlo Security workflow. It eliminates the manual steps of copying, pasting, and editing URLs, allowing you to browse seamlessly. It works in the background to make your protected browsing experience faster and more efficient.
 
+### 🚧 Development Status
+
+This project is in active development. While it's designed to be a reliable daily tool, you may encounter occasional bugs as new features are added and refined. Your feedback is invaluable - if you find an issue or have a suggestion, please [open an issue](https://www.google.com/search?q=https://github.com/bzantium/smart-menlo/issues)!
+
 ### Installation
 
 1.  Clone this repository to your local machine:
