@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="assets/icon48.png" alt="Smart Menlo 로고" style="width: 32px; height: 32px;"> Smart Menlo
+  <img src="assets/icon48.png" alt="Smart Menlo Logo" style="width: 32px; height: 32px;"> Smart Menlo
 </h1>
 
 <div align="center" style="line-height: 1.5;">
