@@ -49,7 +49,6 @@ const isUrlForced = (url) => {
 
 const handleBeforeNavigate = async (details) => {
   if (details.frameId !== 0) {
-    log('[Smart Menlo] Skipping navigation for non-main frame:', details.frameId);
     return;
   }
 
@@ -101,7 +100,6 @@ const handleError = async (details) => {
   log(`[Smart Menlo] onErrorOccurred event triggered for URL: ${url} with error: ${err}`);
 
   if (frameId !== 0) {
-    log('[Smart Menlo] Skipping error handling for non-main frame:', frameId);
     return;
   }
   if (!url.startsWith('http')) {
