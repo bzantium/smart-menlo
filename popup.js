@@ -162,19 +162,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') addUrl();
   });
 
-
   const initializePopup = async () => {
     const data = await chrome.storage.local.get(['language', 'isEnabled']);
     
+
     const lang = data.language || chrome.i18n.getUILanguage().split('-')[0] || 'en';
     languageSelect.value = lang;
-    
+
     await loadTranslations(lang);
     applyTranslations();
-    
+
     toggleSwitch.checked = typeof data.isEnabled === 'undefined' ? true : !!data.isEnabled;
     updateStatusText(toggleSwitch.checked);
-
     loadAndRenderList();
   };
 
