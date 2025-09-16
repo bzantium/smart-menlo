@@ -43,6 +43,10 @@
     "message": "This URL is already in the list.",
     "description": "Error message when adding a duplicate URL"
   },
+  "urlFormatInvalid": {
+    "message": "The URL format is invalid.",
+    "description": "Error message for invalid URL format"
+  },
   "langEn": {
     "message": "English",
     "description": "English language"

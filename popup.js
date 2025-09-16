@@ -91,6 +91,15 @@ document.addEventListener('DOMContentLoaded', () => {
               .replace(/\/$/, '');
   };
 
+  const isValidPattern = (pattern) => {
+    if (!pattern) return false;
+    if (/\s/.test(pattern)) return false;
+    if (!pattern.includes('.')) return false; 
+    if (pattern.startsWith('.') || pattern.endsWith('.') || pattern.startsWith('/')) return false;
+    if (pattern.includes('/') && pattern.split('/')[0] === '') return false;
+    return true; 
+  };
+
   const loadAndRenderList = async () => {
     try {
       const data = await chrome.storage.local.get('forceMenloList');
@@ -126,8 +135,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const addUrl = async () => {
     try {
-      const newPattern = sanitizePattern(newUrlInput.value);
-      if (!newPattern) {
+      const rawInput = newUrlInput.value;
+      if (!rawInput || rawInput.trim() === '') {
+        newUrlInput.value = '';
+        return;
+      }
+
+      const newPattern = sanitizePattern(rawInput);
+
+      if (!isValidPattern(newPattern)) {
+        showMessage('urlFormatInvalid', true);
         return;
       }
       
@@ -167,6 +184,11 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const newPattern = sanitizePattern(input.value);
         if (newPattern && newPattern !== currentPattern && !forceMenloList.includes(newPattern)) {
+          if (!isValidPattern(newPattern)) {
+            showMessage('urlFormatInvalid', true);
+            renderList();
+            return;
+          }
           forceMenloList[index] = newPattern;
           await chrome.storage.local.set({ forceMenloList: forceMenloList });
         }

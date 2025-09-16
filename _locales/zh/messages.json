@@ -43,6 +43,10 @@
     "message": "此URL已在列表中。",
     "description": "Error message when adding a duplicate URL"
   },
+  "urlFormatInvalid": {
+    "message": "网址格式无效。",
+    "description": "Error message for invalid URL format"
+  },
   "langEn": {
     "message": "英语",
     "description": "English language"

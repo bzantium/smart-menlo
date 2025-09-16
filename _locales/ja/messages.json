@@ -16,7 +16,7 @@
     "description": "Header of the popup"
   },
   "popupDesc": {
-    "message": "ウェブサイトへの接続に失敗した場合、自動的にMenlo Security経由で再接続します。",
+    "message": "ウェブサイトへの接続に失敗した場合、自動的にMenlo Security経Dで再接続します。",
     "description": "Description in the popup"
   },
   "enable": {
@@ -42,6 +42,10 @@
   "urlAlreadyExists": {
     "message": "このURLはすでにリストに存在します。",
     "description": "Error message when adding a duplicate URL"
+  },
+  "urlFormatInvalid": {
+    "message": "URLの形式が正しくありません。",
+    "description": "Error message for invalid URL format"
   },
   "langEn": {
     "message": "英語",
