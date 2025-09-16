@@ -126,6 +126,15 @@ h3 {
   cursor: pointer;
 }
 
+.message-area {
+  font-size: 12px;
+  color: #d63328;
+  margin-top: 8px;
+  min-height: 16px;
+  text-align: left;
+  padding-left: 8px;
+}
+
 /* The switch - https://www.w3schools.com/howto/howto_css_switch.asp */
 .switch {
   position: relative;

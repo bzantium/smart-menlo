@@ -5,8 +5,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const newUrlInput = document.getElementById('newUrlInput');
   const addUrlBtn = document.getElementById('addUrlBtn');
   const languageSelect = document.getElementById('language-select');
+  const messageArea = document.getElementById('messageArea');
 
   let translations = {};
+  let messageTimer = null;
 
   const i18n = (key) => {
     return translations[key] ? translations[key].message : `__${key}__`;
@@ -46,6 +48,25 @@ document.addEventListener('DOMContentLoaded', () => {
     switchStatus.textContent = isEnabled ? i18n('enable') : i18n('disable');
     switchStatus.style.color = isEnabled ? '#d63328' : '#888';
   }
+
+  const showMessage = (key, isError = true) => {
+    if (messageTimer) {
+      clearTimeout(messageTimer);
+    }
+    messageArea.textContent = i18n(key);
+    messageArea.style.color = isError ? '#d63328' : '#008000'; // Error or Success
+    
+    messageTimer = setTimeout(() => {
+      messageArea.textContent = '';
+    }, 2000);
+  };
+  
+  newUrlInput.addEventListener('input', () => {
+     if (messageTimer) {
+       clearTimeout(messageTimer);
+     }
+     messageArea.textContent = '';
+  });
 
   languageSelect.addEventListener('change', async (event) => {
     const selectedLang = event.target.value;
@@ -106,7 +127,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const addUrl = async () => {
     try {
       const newPattern = sanitizePattern(newUrlInput.value);
-      if (newPattern && !forceMenloList.includes(newPattern)) {
+      if (!newPattern) {
+        return;
+      }
+      
+      if (forceMenloList.includes(newPattern)) {
+        showMessage('urlAlreadyExists', true);
+      } else {
         forceMenloList.push(newPattern);
         await chrome.storage.local.set({ forceMenloList: forceMenloList });
         newUrlInput.value = '';
