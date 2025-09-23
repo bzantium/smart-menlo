@@ -39,6 +39,7 @@ This project is in active development. While it's designed to be a reliable dail
 2.  Open Chrome and navigate to `chrome://extensions/`.
 3.  Enable **Developer mode** in the top-right corner.
 4.  Click **Load unpacked** and select the cloned repository folder.
+5.  (Optional) For easy access, **pin the extension to your toolbar**. This makes it convenient to toggle the extension on/off and manage your forced redirection list.
 
 ### How It Works
 
