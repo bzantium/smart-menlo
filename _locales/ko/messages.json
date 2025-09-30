@@ -39,6 +39,10 @@
     "message": "추가",
     "description": "Add button text"
   },
+  "openWithMenloBtn": {
+    "message": "현재 페이지를 Menlo로 열기",
+    "description": "현재 페이지를 즉시 Menlo Security를 통해 여는 버튼."
+  },
   "urlAlreadyExists": {
     "message": "이 URL은 이미 목록에 있습니다.",
     "description": "Error message when adding a duplicate URL"
@@ -46,6 +50,10 @@
   "urlFormatInvalid": {
     "message": "URL 포맷이 맞지 않습니다.",
     "description": "Error message for invalid URL format"
+  },
+  "urlCannotRedirect": {
+    "message": "이 페이지는 리디렉션할 수 없습니다.",
+    "description": "현재 페이지가 리디렉션할 수 없는 URL일 때의 오류 (예: 설정 페이지)."
   },
   "langEn": {
     "message": "영어",

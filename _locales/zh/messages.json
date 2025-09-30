@@ -39,6 +39,10 @@
     "message": "添加",
     "description": "Add button text"
   },
+  "openWithMenloBtn": {
+    "message": "使用Menlo打开当前页面",
+    "description": "立即通过Menlo Security打开当前页面的按钮。"
+  },
   "urlAlreadyExists": {
     "message": "此URL已在列表中。",
     "description": "Error message when adding a duplicate URL"
@@ -46,6 +50,10 @@
   "urlFormatInvalid": {
     "message": "网址格式无效。",
     "description": "Error message for invalid URL format"
+  },
+  "urlCannotRedirect": {
+    "message": "此页面无法重定向。",
+    "description": "当前页面是不可重定向的URL（例如设置页面）时的错误。"
   },
   "langEn": {
     "message": "英语",

@@ -126,6 +126,16 @@ h3 {
   cursor: pointer;
 }
 
+#openWithMenloBtn {
+  background-color: #3c53af;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+}
+
 .message-area {
   font-size: 12px;
   color: #d63328;

@@ -39,6 +39,10 @@
     "message": "追加",
     "description": "Add button text"
   },
+  "openWithMenloBtn": {
+    "message": "現在のページをMenloで開く",
+    "description": "現在のページをすぐにMenlo Security経由で開くためのボタン。"
+  },
   "urlAlreadyExists": {
     "message": "このURLはすでにリストに存在します。",
     "description": "Error message when adding a duplicate URL"
@@ -46,6 +50,10 @@
   "urlFormatInvalid": {
     "message": "URLの形式が正しくありません。",
     "description": "Error message for invalid URL format"
+  },
+  "urlCannotRedirect": {
+    "message": "このページはリダイレクトできません。",
+    "description": "現在のページがリダイレクトできないURLの場合のエラー（例：設定ページ）。"
   },
   "langEn": {
     "message": "英語",
