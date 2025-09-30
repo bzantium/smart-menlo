@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const forceMenloListDiv = document.getElementById('forceMenloList');
   const newUrlInput = document.getElementById('newUrlInput');
   const addUrlBtn = document.getElementById('addUrlBtn');
+  const openWithMenloBtn = document.getElementById('openWithMenloBtn');
   const languageSelect = document.getElementById('language-select');
   const messageArea = document.getElementById('messageArea');
 
@@ -208,6 +209,28 @@ document.addEventListener('DOMContentLoaded', () => {
   addUrlBtn.addEventListener('click', addUrl);
   newUrlInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') addUrl();
+  });
+
+  openWithMenloBtn.addEventListener('click', async () => {
+    try {
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tabs && tabs.length > 0) {
+        const currentTab = tabs[0];
+        const currentUrl = currentTab.url;
+        const MENLO_PREFIX = "https://safe.menlosecurity.com/";
+  
+        if (currentUrl.startsWith('http') && !currentUrl.startsWith(MENLO_PREFIX)) {
+          const menloUrl = MENLO_PREFIX + currentUrl;
+          await chrome.storage.session.set({ [currentTab.id.toString()]: true });
+          await chrome.tabs.update(currentTab.id, { url: menloUrl });
+          window.close();
+        } else {
+          showMessage('urlCannotRedirect', true);
+        }
+      }
+    } catch (e) {
+      console.error('[Smart Menlo] Error in openWithMenloBtn click:', e);
+    }
   });
 
   const initializePopup = async () => {

@@ -39,6 +39,10 @@
     "message": "Add",
     "description": "Add button text"
   },
+  "openWithMenloBtn": {
+    "message": "Open Current Page with Menlo",
+    "description": "Button to immediately open the current page via Menlo Security."
+  },
   "urlAlreadyExists": {
     "message": "This URL is already in the list.",
     "description": "Error message when adding a duplicate URL"
@@ -46,6 +50,10 @@
   "urlFormatInvalid": {
     "message": "The URL format is invalid.",
     "description": "Error message for invalid URL format"
+  },
+  "urlCannotRedirect": {
+    "message": "This page cannot be redirected.",
+    "description": "Error when the current page is not a redirectable URL (e.g. settings page)."
   },
   "langEn": {
     "message": "English",
