@@ -23,7 +23,13 @@
     </div>
 
     <div class="list-container">
-      <h4 data-i18n="forceMenloListTitle">__MSG_forceMenloListTitle__</h4>
+      <div class="list-header">
+        <h4 data-i18n="forceMenloListTitle">__MSG_forceMenloListTitle__</h4>
+        <label class="mini-switch">
+          <input type="checkbox" id="forceMenloToggle">
+          <span class="mini-slider round"></span>
+        </label>
+      </div>
       <div id="forceMenloList" class="list"></div>
       <div class="list-action">
         <input type="text" id="newUrlInput" data-i18n-placeholder="newUrlInputPlaceholder">

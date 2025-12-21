@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const toggleSwitch = document.getElementById('toggleSwitch');
   const switchStatus = document.getElementById('switchStatus');
+  const forceMenloToggle = document.getElementById('forceMenloToggle');
   const forceMenloListDiv = document.getElementById('forceMenloList');
   const newUrlInput = document.getElementById('newUrlInput');
   const addUrlBtn = document.getElementById('addUrlBtn');
@@ -56,12 +57,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     messageArea.textContent = i18n(key);
     messageArea.style.color = isError ? '#d63328' : '#008000'; // Error or Success
-    
+
     messageTimer = setTimeout(() => {
       messageArea.textContent = '';
     }, 2000);
   };
-  
+
   newUrlInput.addEventListener('input', () => {
      if (messageTimer) {
        clearTimeout(messageTimer);
@@ -82,6 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
     updateStatusText(isEnabled);
   });
 
+  forceMenloToggle.addEventListener('change', () => {
+    const isForceMenloEnabled = forceMenloToggle.checked;
+    chrome.storage.local.set({ forceMenloEnabled: isForceMenloEnabled });
+  });
+
   let forceMenloList = [];
 
   const sanitizePattern = (url) => {
@@ -95,10 +101,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const isValidPattern = (pattern) => {
     if (!pattern) return false;
     if (/\s/.test(pattern)) return false;
-    if (!pattern.includes('.')) return false; 
+    if (!pattern.includes('.')) return false;
     if (pattern.startsWith('.') || pattern.endsWith('.') || pattern.startsWith('/')) return false;
     if (pattern.includes('/') && pattern.split('/')[0] === '') return false;
-    return true; 
+    return true;
   };
 
   const loadAndRenderList = async () => {
@@ -148,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showMessage('urlFormatInvalid', true);
         return;
       }
-      
+
       if (forceMenloList.includes(newPattern)) {
         showMessage('urlAlreadyExists', true);
       } else {
@@ -218,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentTab = tabs[0];
         const currentUrl = currentTab.url;
         const MENLO_PREFIX = "https://safe.menlosecurity.com/";
-  
+
         if (currentUrl.startsWith('http') && !currentUrl.startsWith(MENLO_PREFIX)) {
           const menloUrl = MENLO_PREFIX + currentUrl;
           await chrome.storage.session.set({ [currentTab.id.toString()]: true });
@@ -234,16 +240,17 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   const initializePopup = async () => {
-    const data = await chrome.storage.local.get(['language', 'isEnabled']);
-    
+    const data = await chrome.storage.local.get(['language', 'isEnabled', 'forceMenloEnabled']);
+
     const lang = data.language || chrome.i18n.getUILanguage().split('-')[0] || 'en';
     languageSelect.value = lang;
 
     toggleSwitch.checked = data.isEnabled !== false;
+    forceMenloToggle.checked = data.forceMenloEnabled !== false;
 
     await loadTranslations(lang);
     applyTranslations();
-    
+
     await loadAndRenderList();
   };
 

@@ -11,9 +11,14 @@ log('[Smart Menlo] Service Worker script evaluating.');
 const MENLO_PREFIX = "https://safe.menlosecurity.com/";
 let forceMenloList = [];
 let isEnabled = true;
+let forceMenloEnabled = true;
 const KEEPALIVE_ALARM_NAME = 'smart-menlo-keepalive';
 
 const isUrlForced = (url) => {
+  if (!forceMenloEnabled) {
+    log('[Smart Menlo] isUrlForced: Force Menlo list is disabled.');
+    return false;
+  }
   if (!url || !url.startsWith('http')) {
     log('[Smart Menlo] isUrlForced: URL is invalid or not HTTP/HTTPS.', url);
     return false;
@@ -128,10 +133,18 @@ chrome.runtime.onInstalled.addListener(() => {
   log('[Smart Menlo] Extension installed or updated.');
   chrome.alarms.create(KEEPALIVE_ALARM_NAME, { periodInMinutes: 1 });
   log('[Smart Menlo] Keep-alive alarm created.');
-  chrome.storage.local.get('isEnabled', (data) => {
+  chrome.storage.local.get(['isEnabled', 'forceMenloEnabled'], (data) => {
+    const updates = {};
     if (typeof data.isEnabled === 'undefined') {
-      chrome.storage.local.set({ isEnabled: true });
+      updates.isEnabled = true;
       log('[Smart Menlo] isEnabled not set, setting to true.');
+    }
+    if (typeof data.forceMenloEnabled === 'undefined') {
+      updates.forceMenloEnabled = true;
+      log('[Smart Menlo] forceMenloEnabled not set, setting to true.');
+    }
+    if (Object.keys(updates).length > 0) {
+      chrome.storage.local.set(updates);
     }
   });
 });
@@ -149,6 +162,10 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
       isEnabled = changes.isEnabled.newValue;
       log(`[Smart Menlo] isEnabled state updated to: ${isEnabled}`);
     }
+    if (changes.forceMenloEnabled) {
+      forceMenloEnabled = changes.forceMenloEnabled.newValue;
+      log(`[Smart Menlo] forceMenloEnabled state updated to: ${forceMenloEnabled}`);
+    }
     if (changes.forceMenloList) {
       forceMenloList = changes.forceMenloList.newValue || [];
       log('[Smart Menlo] forceMenloList reloaded:', forceMenloList);
@@ -164,10 +181,11 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 const loadInitialState = async () => {
   log('[Smart Menlo] Loading initial state.');
   try {
-    const data = await chrome.storage.local.get(['forceMenloList', 'isEnabled']);
+    const data = await chrome.storage.local.get(['forceMenloList', 'isEnabled', 'forceMenloEnabled']);
     forceMenloList = data.forceMenloList || [];
     isEnabled = data.isEnabled !== false;
-    log('[Smart Menlo] State loaded:', { isEnabled, forceMenloList });
+    forceMenloEnabled = data.forceMenloEnabled !== false;
+    log('[Smart Menlo] State loaded:', { isEnabled, forceMenloEnabled, forceMenloList });
   } catch (e) {
     error('[Smart Menlo] Error loading initial state:', e);
   }
