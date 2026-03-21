@@ -20,7 +20,7 @@
     "description": "Description in the popup"
   },
   "forceMenloListTitle": {
-    "message": "Menloリダイレクト URLリスト",
+    "message": "Menlo強制リダイレクトURLリスト",
     "description": "Title for the force menlo list"
   },
   "newUrlInputPlaceholder": {

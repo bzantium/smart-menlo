@@ -20,7 +20,7 @@
     "description": "Description in the popup"
   },
   "forceMenloListTitle": {
-    "message": "Menlo 리디렉션 URL 목록",
+    "message": "Menlo 강제 리디렉션 URL 목록",
     "description": "Title for the force menlo list"
   },
   "newUrlInputPlaceholder": {

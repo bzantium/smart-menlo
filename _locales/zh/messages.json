@@ -20,7 +20,7 @@
     "description": "Description in the popup"
   },
   "forceMenloListTitle": {
-    "message": "Menlo重定向URL列表",
+    "message": "Menlo强制重定向URL列表",
     "description": "Title for the force menlo list"
   },
   "newUrlInputPlaceholder": {
