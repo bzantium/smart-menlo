@@ -47,23 +47,15 @@ const handleBeforeNavigateGlobal = async (tabId, url) => {
       log('[Smart Menlo] Extracted original URL:', originalUrlString);
 
       if (!vpnPolicyProd) {
+        // Not in prod — strip Menlo prefix (no auto-redirect needed)
         log('[Smart Menlo] VPN policy is not prod. Stripping Menlo prefix.');
         await chrome.storage.session.set({ [tabId.toString()]: true });
         chrome.tabs.update(tabId, { url: originalUrlString });
         return;
       }
 
-      if (!tabState[tabId.toString()]) {
-        log('[Smart Menlo] VPN auto-redirect detected (no session flag). Confirming vpnPolicyProd = true.');
-      }
-
-      if (!isUrlForced(originalUrlString)) {
-        log(`[Smart Menlo] URL is not in force list. Redirecting tab ${tabId} to original URL.`);
-        await chrome.storage.session.set({ [tabId.toString()]: true });
-        chrome.tabs.update(tabId, { url: originalUrlString });
-      } else {
-        log('[Smart Menlo] Original URL is in the force list, not redirecting from Menlo.');
-      }
+      // In prod — VPN auto-redirect is active, don't interfere
+      log('[Smart Menlo] VPN auto-redirect active (prod). Allowing Menlo URL.');
     }
     return;
   }
