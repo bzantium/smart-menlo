@@ -29,30 +29,6 @@ h3 {
   color: #d63328;
 }
 
-.content p {
-  font-size: 13px;
-  margin: 10px 0 20px;
-  line-height: 1.5;
-}
-
-.action {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 10px;
-}
-
-#switchStatus {
-    margin-left: 15px;
-    font-size: 14px;
-    font-weight: bold;
-    min-width: 60px;
-    text-align: left;
-}
-
 .list-container {
   margin-top: 20px;
   background-color: #fff;
@@ -75,14 +51,84 @@ h3 {
   color: #333;
 }
 
-/* Mini toggle switch for force list */
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 10px 10px 18px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.toggle-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+.toggle-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+}
+
+input:checked + .slider {
+  background-color: #d63328;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+.slider.round {
+  border-radius: 24px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
 .mini-switch {
   position: relative;
   display: inline-block;
-  width: 40px;
-  height: 22px;
-  flex-shrink: 0;
-  margin-top: 5px;
+  width: 36px;
+  height: 20px;
 }
 
 .mini-switch input {
@@ -94,47 +140,98 @@ h3 {
 .mini-slider {
   position: absolute;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   background-color: #ccc;
-  -webkit-transition: .3s;
-  transition: .3s;
+  transition: 0.3s;
 }
 
 .mini-slider:before {
   position: absolute;
   content: "";
-  height: 16px;
-  width: 16px;
+  height: 14px;
+  width: 14px;
   left: 3px;
   bottom: 3px;
   background-color: white;
-  -webkit-transition: .3s;
-  transition: .3s;
+  transition: 0.3s;
 }
 
-.mini-switch input:checked + .mini-slider {
+input:checked + .mini-slider {
   background-color: #d63328;
 }
 
-.mini-switch input:focus + .mini-slider {
-  box-shadow: 0 0 1px #d63328;
-}
-
-.mini-switch input:checked + .mini-slider:before {
-  -webkit-transform: translateX(18px);
-  -ms-transform: translateX(18px);
-  transform: translateX(18px);
+input:checked + .mini-slider:before {
+  transform: translateX(16px);
 }
 
 .mini-slider.round {
-  border-radius: 22px;
+  border-radius: 20px;
 }
 
 .mini-slider.round:before {
   border-radius: 50%;
+}
+
+.vpn-policy-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 10px 10px 18px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.vpn-policy-banner.active {
+  color: #2e7d32;
+}
+
+.vpn-policy-banner.inactive {
+  color: #888;
+}
+
+.vpn-policy-banner.switching {
+  color: #e67e22;
+}
+
+.policy-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.policy-mode-select {
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 12px;
+}
+
+.refresh-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #888;
+  padding: 0 13px;
+  line-height: 1;
+  transition: transform 0.3s;
+}
+
+.refresh-btn:hover {
+  color: #333;
+}
+
+.refresh-btn.spinning {
+  animation: spin 0.6s linear;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .list {
@@ -215,69 +312,25 @@ h3 {
   padding-left: 8px;
 }
 
-/* The switch - https://www.w3schools.com/howto/howto_css_switch.asp */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-input:checked + .slider {
-  background-color: #d63328;
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px #d63328;
-}
-
-input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
-}
-
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
-}
-
 .footer {
   margin-top: 20px;
-  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #888;
+}
+
+.footer-left select {
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
 }
 
 #language-select {

@@ -4,7 +4,7 @@
     "description": "The name of the application"
   },
   "appDesc": {
-    "message": "Automatically redirects failed site connections to the Menlo Security URL.",
+    "message": "Manages Menlo Security redirection based on VPN policy.",
     "description": "The description of the application"
   },
   "popupTitle": {
@@ -16,19 +16,11 @@
     "description": "Header of the popup"
   },
   "popupDesc": {
-    "message": "When a website fails to connect, it automatically reconnects through Menlo Security.",
+    "message": "When VPN policy is active, redirects URLs not auto-redirected to Menlo Security.",
     "description": "Description in the popup"
   },
-  "enable": {
-    "message": "Enable",
-    "description": "Enable switch status"
-  },
-  "disable": {
-    "message": "Disable",
-    "description": "Disable switch status"
-  },
   "forceMenloListTitle": {
-    "message": "Always Open with Menlo URL List",
+    "message": "Menlo Redirect URL List",
     "description": "Title for the force menlo list"
   },
   "newUrlInputPlaceholder": {
@@ -70,5 +62,57 @@
   "langZh": {
     "message": "Chinese",
     "description": "Chinese language"
+  },
+  "vpnAppLabel": {
+    "message": "VPN APP",
+    "description": "Label for VPN app selector"
+  },
+  "enable": {
+    "message": "Enabled",
+    "description": "Enabled status text"
+  },
+  "disable": {
+    "message": "Disabled",
+    "description": "Disabled status text"
+  },
+  "policyLabel": {
+    "message": "Policy",
+    "description": "Label for VPN policy status"
+  },
+  "policyActive": {
+    "message": "Active",
+    "description": "Policy active status text"
+  },
+  "policyInactive": {
+    "message": "Inactive",
+    "description": "Policy inactive status text"
+  },
+  "popupDescGlobal": {
+    "message": "Automatically manages Menlo redirection based on VPN policy. URLs below are always routed through Menlo when the policy is active.",
+    "description": "Description for Global mode"
+  },
+  "popupDescIvanti": {
+    "message": "Manually control Menlo Security redirection. Toggle the extension on/off and manage URLs routed through Menlo.",
+    "description": "Description for Ivanti mode"
+  },
+  "ivantiToggleLabel": {
+    "message": "Menlo Redirection",
+    "description": "Label for the Ivanti enable/disable toggle"
+  },
+  "forceMenloListDescGlobal": {
+    "message": "These URLs are always routed through Menlo when the policy is active.",
+    "description": "Force list description for Global mode"
+  },
+  "forceMenloListDescIvanti": {
+    "message": "When enabled, these URLs are always routed through Menlo.",
+    "description": "Force list description for Ivanti mode"
+  },
+  "modeAutomatic": {
+    "message": "Automatic",
+    "description": "Automatic mode badge text"
+  },
+  "modeManual": {
+    "message": "Manual",
+    "description": "Manual mode badge text"
   }
 }

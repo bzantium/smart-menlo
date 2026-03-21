@@ -11,17 +11,34 @@
       <img src="assets/icon48.png" alt="Smart Menlo Icon">
       <h3 data-i18n="popupHeader">__MSG_popupHeader__</h3>
     </div>
-    <div class="content">
-      <p data-i18n="popupDesc">__MSG_popupDesc__</p>
-    </div>
-    <div class="action">
-      <label class="switch">
-        <input type="checkbox" id="toggleSwitch">
-        <span class="slider round"></span>
-      </label>
-      <span id="switchStatus"></span>
+    <!-- Global mode: VPN status + mode switch -->
+    <div id="globalSection">
+      <div id="vpnPolicyBanner" class="vpn-policy-banner">
+        <span id="vpnPolicyText"></span>
+        <div class="policy-controls">
+          <select id="policyModeSelect" class="policy-mode-select">
+            <option value="prod">prod</option>
+            <option value="default">dev</option>
+          </select>
+          <button id="refreshPolicyBtn" class="refresh-btn" title="Refresh">&#x21bb;</button>
+        </div>
+      </div>
     </div>
 
+    <!-- Ivanti mode: enable/disable toggle -->
+    <div id="ivantiSection" style="display: none;">
+      <div class="toggle-row">
+        <span class="toggle-label" data-i18n="ivantiToggleLabel">__MSG_ivantiToggleLabel__</span>
+        <div class="toggle-control">
+          <label class="switch">
+            <input type="checkbox" id="toggleSwitch">
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Force list (shared) -->
     <div class="list-container">
       <div class="list-header">
         <h4 data-i18n="forceMenloListTitle">__MSG_forceMenloListTitle__</h4>
@@ -43,6 +60,13 @@
     </div>
 
     <div class="footer">
+      <div class="footer-left">
+        <label data-i18n="vpnAppLabel">VPN APP</label>
+        <select id="vpnModeSelect">
+          <option value="global">Global</option>
+          <option value="ivanti">Ivanti</option>
+        </select>
+      </div>
       <select id="language-select">
         <option value="en" data-i18n="langEn">__MSG_langEn__</option>
         <option value="ko" data-i18n="langKo">__MSG_langKo__</option>
@@ -50,8 +74,9 @@
         <option value="zh" data-i18n="langZh">__MSG_langZh__</option>
       </select>
     </div>
-
   </div>
+  <script src="popup-global.js"></script>
+  <script src="popup-ivanti.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

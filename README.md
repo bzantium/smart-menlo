@@ -17,57 +17,103 @@
   <a href="https://www.readme-i18n.com/bzantium/smart-menlo?lang=zh">中文</a>
 </div>
 
+---
 
 ### The Problem
 
-If you work in a corporate environment that uses Menlo Security, you're familiar with the routine: you try to visit a site, it gets blocked, and then you manually copy the URL to open it through Menlo. Furthermore, when you receive a Menlo link from a colleague, you can't access the original site directly without first stripping the prefix. These small hurdles disrupt your workflow and add up over time.
+Corporate environments using Menlo Security face different challenges depending on the VPN solution:
+
+- **Global Protect**: VPN auto-redirects most sites through Menlo, but some URLs (e.g., `x.com`) are missed. There's no easy way to force those through Menlo, and switching between `prod`/`dev` modes requires navigating to an admin page.
+- **Ivanti**: No automatic redirection — when a site is blocked, you manually copy the URL and open it through Menlo. Menlo links from colleagues require stripping the prefix to access the original site.
 
 ### The Solution: Smart Menlo 🚀
 
-**Smart Menlo** is an intelligent assistant that automates your entire Menlo Security workflow. It eliminates the manual steps of copying, pasting, and editing URLs, allowing you to browse seamlessly. It works in the background to make your protected browsing experience faster and more efficient.
+**Smart Menlo** is a Chrome extension that manages Menlo Security redirection based on your VPN setup. It supports two modes — **Global** and **Ivanti** — to handle different VPN environments automatically.
 
 ### 🚧 Development Status
 
-This project is in active development. While it's designed to be a reliable daily tool, you may encounter occasional bugs as new features are added and refined. Your feedback is invaluable - if you find an issue or have a suggestion, please [open an issue](https://github.com/bzantium/smart-menlo/issues)!
+This project is in active development. If you find an issue or have a suggestion, please [open an issue](https://github.com/bzantium/smart-menlo/issues)!
+
+---
+
+### Features
+
+#### Global Mode (Automatic)
+
+Designed for **Global Protect** VPN users.
+
+- **VPN Status Detection**: Automatically detects whether the VPN is connected by checking the policy endpoint. Displays `VPN: On (prod/dev)` or `VPN: Off` in the popup.
+- **prod/dev Mode Switching**: Switch between `prod` and `dev` VPN modes directly from the popup — no need to visit the admin page.
+- **Force List**: When the VPN is in `prod` mode, URLs in the force list are always routed through Menlo. This fills the gap for sites that the VPN auto-redirect misses.
+- **Intelligent Link Handling**: Strips the Menlo prefix from URLs that are not in the force list, giving you direct access. When `prod` is off, all Menlo prefixes are stripped automatically.
+
+#### Ivanti Mode (Manual)
+
+Designed for **Ivanti** VPN users.
+
+- **Manual On/Off Toggle**: Enable or disable Menlo redirection with a single switch.
+- **Force List**: URLs in the force list are always routed through Menlo when the extension is enabled.
+- **Automatic Fallback**: When a site connection fails, Smart Menlo automatically retries through Menlo Security.
+- **Intelligent Link Handling**: Strips the Menlo prefix from non-forced URLs for direct access.
+
+#### Shared Features
+
+- **Force List Management**: Add, edit, and delete URL patterns. Toggle the force list on/off independently.
+- **Open Current Page with Menlo**: One-click button to open the active tab through Menlo Security.
+- **Multi-language Support**: English, 한국어, 日本語, 中文.
+
+---
 
 ### Installation
 
-1.  Clone this repository to your local machine:
+1. Clone this repository:
     ```sh
     git clone https://github.com/bzantium/smart-menlo.git
     ```
-2.  Open Chrome and navigate to `chrome://extensions/`.
-3.  Enable **Developer mode** in the top-right corner.
-4.  Click **Load unpacked** and select the cloned repository folder.
-5.  (Optional) For easy access, **pin the extension to your toolbar**. This makes it convenient to toggle the extension on/off and manage your forced redirection list.
+2. Open Chrome and navigate to `chrome://extensions/`.
+3. Enable **Developer mode** in the top-right corner.
+4. Click **Load unpacked** and select the cloned repository folder.
+5. (Optional) Pin the extension to your toolbar for quick access.
 
-### How It Works
+---
 
-Smart Menlo has three core automatic behaviors designed to make your life easier.
+### Force List Rules
 
-#### 1\. Automatic Fallback on Error
-
-This is the most fundamental feature. When you try to access a website and the connection fails with a network error, Smart Menlo instantly catches it and automatically re-opens the page through Menlo Security.
-
-#### 2\. Intelligent Link Handling
-
-When you click a link that's already a Menlo URL (e.g., `https://safe.menlosecurity.com/https://github.com`), Smart Menlo performs a clever check:
-
-1.  It first **strips the Menlo prefix** and tries to connect you directly to the original URL (`https://github.com`).
-2.  If the direct connection succeeds, great\! You're on the original site.
-3.  If the direct connection **fails**, Smart Menlo's "Automatic Fallback" feature kicks in and redirects you back to the secure Menlo Security version.
-
-This ensures you always try the fastest, most direct route first without sacrificing security.
-
-#### 3\. The Forced Redirection List
-
-This is the extension's most powerful feature, giving you full control. From the popup, you can add rules to ensure certain sites **always** open through Menlo Security, skipping any direct connection attempts. The matching is flexible, with two rule types:
-
-| Rule Type | Example Rule in List | Behavior |
+| Rule Type | Example | Behavior |
 | :--- | :--- | :--- |
-| **Subdomain**<br>(No `/` in rule) | `notion.site` | Matches the domain and **any subdomain**.<br>- `https://www.notion.site` -> Redirects<br>- `https://bzantium.notion.site` -> Redirects |
-| **Path**<br>(Contains `/` in rule) | `huggingface.co/papers` | Matches URLs that **start with** that exact path.<br>- `https://huggingface.co/papers/2305.12345` -> Redirects<br>- `https://huggingface.co/models` -> **Does Not** Redirect |
+| **Subdomain** (no `/`) | `notion.site` | Matches the domain and any subdomain.<br>`https://www.notion.site` → Redirects<br>`https://bzantium.notion.site` → Redirects |
+| **Path** (contains `/`) | `huggingface.co/papers` | Matches URLs starting with that exact path.<br>`https://huggingface.co/papers/2305.12345` → Redirects<br>`https://huggingface.co/models` → Does not redirect |
+
+---
+
+### Architecture
+
+```
+smart-menlo/
+├── manifest.json          # Chrome Extension Manifest V3 config
+├── background.js          # Service worker entry point (dispatcher)
+├── bg-shared.js           # Shared constants, state, URL matching logic
+├── bg-global.js           # Global mode: VPN policy check, navigation handler
+├── bg-ivanti.js           # Ivanti mode: navigation handler
+├── popup.html             # Extension popup UI
+├── popup.js               # Shared popup logic (i18n, force list, mode switching)
+├── popup-global.js        # Global mode UI (VPN status, prod/dev selector)
+├── popup-ivanti.js        # Ivanti mode UI (enable toggle)
+├── style.css              # Popup styles
+├── _locales/              # Translations (en, ko, ja, zh)
+└── assets/                # Extension icons
+```
+
+---
 
 ### Troubleshooting
 
-If the extension doesn't seem to be working, try refreshing it from the `chrome://extensions` page or toggling it off and on again. This resolves most issues.
+- **Extension not working?** Refresh it from `chrome://extensions` or toggle the VPN APP mode.
+- **VPN status stuck on "Switching"?** Refresh the extension — the switching state will reset automatically.
+- **Force list not working in Global mode?** Ensure the VPN is in `prod` mode and the force list toggle is enabled.
+
+---
+
+### License
+
+[MIT](LICENSE) © Minho Ryu

@@ -1,96 +1,16 @@
-const log = (...args) => {
-  console.log(`[${new Date().toLocaleTimeString()}]`, ...args);
-};
-
-const error = (...args) => {
-  console.error(`[${new Date().toLocaleTimeString()}]`, ...args);
-};
+importScripts('bg-shared.js', 'bg-global.js', 'bg-ivanti.js');
 
 log('[Smart Menlo] Service Worker script evaluating.');
 
-const MENLO_PREFIX = "https://safe.menlosecurity.com/";
-let forceMenloList = [];
-let isEnabled = true;
-let forceMenloEnabled = true;
-const KEEPALIVE_ALARM_NAME = 'smart-menlo-keepalive';
-
-const isUrlForced = (url) => {
-  if (!forceMenloEnabled) {
-    log('[Smart Menlo] isUrlForced: Force Menlo list is disabled.');
-    return false;
-  }
-  if (!url || !url.startsWith('http')) {
-    log('[Smart Menlo] isUrlForced: URL is invalid or not HTTP/HTTPS.', url);
-    return false;
-  }
-  try {
-    const currentUrl = new URL(url);
-    const currentHostname = currentUrl.hostname;
-    const urlWithoutProtocol = url.replace(/^https?:\/\//, '');
-    const isForced = forceMenloList.some(pattern => {
-      if (pattern.includes('/')) {
-        const check = (targetUrl, p) => {
-          if (targetUrl.startsWith(p)) {
-            const charAfterPattern = targetUrl[p.length];
-            return charAfterPattern === undefined || ['/', '?', '#'].includes(charAfterPattern);
-          }
-          return false;
-        };
-        const isMatch = check(urlWithoutProtocol, pattern) || (urlWithoutProtocol.startsWith('www.') && check(urlWithoutProtocol.substring(4), pattern));
-        if (isMatch) log(`[Smart Menlo] isUrlForced: URL matched path pattern '${pattern}'. URL: ${url}`);
-        return isMatch;
-      } else {
-        const isMatch = currentHostname === pattern || currentHostname.endsWith('.' + pattern);
-        if (isMatch) log(`[Smart Menlo] isUrlForced: URL matched subdomain pattern '${pattern}'. URL: ${url}`);
-        return isMatch;
-      }
-    });
-    return isForced;
-  } catch (e) {
-    error(`[Smart Menlo] URL parsing error in isUrlForced for URL: ${url}`, e);
-    return false;
-  }
-};
-
 const handleBeforeNavigate = async (details) => {
-  if (details.frameId !== 0) {
-    return;
-  }
-
-  if (!isEnabled) {
-    log('[Smart Menlo] Extension is disabled, skipping handleBeforeNavigate.');
-    return;
-  }
-
+  if (details.frameId !== 0) return;
   log('[Smart Menlo] onBeforeNavigate event triggered for URL:', details.url);
   const { tabId, url } = details;
   try {
-    const tabState = await chrome.storage.session.get(tabId.toString());
-    if (tabState[tabId.toString()]) {
-      log(`[Smart Menlo] Tab ${tabId} has a session flag, removing it and allowing navigation.`);
-      await chrome.storage.session.remove(tabId.toString());
-      return;
-    }
-    if (url.startsWith(MENLO_PREFIX)) {
-      log('[Smart Menlo] Detected Menlo URL:', url);
-      const pathAfterPrefix = url.substring(MENLO_PREFIX.length);
-      if (pathAfterPrefix.startsWith('http://') || pathAfterPrefix.startsWith('https://')) {
-        const originalUrlString = pathAfterPrefix;
-        log('[Smart Menlo] Extracted original URL:', originalUrlString);
-        if (!isUrlForced(originalUrlString)) {
-          log(`[Smart Menlo] URL is not in force list. Redirecting tab ${tabId} to original URL.`);
-          await chrome.storage.session.set({ [tabId.toString()]: true });
-          chrome.tabs.update(tabId, { url: originalUrlString });
-        } else {
-          log('[Smart Menlo] Original URL is in the force list, not redirecting from Menlo.');
-        }
-      }
-      return;
-    }
-    if (isUrlForced(url)) {
-      log(`[Smart Menlo] URL is in force list. Redirecting tab ${tabId} to Menlo.`);
-      await chrome.storage.session.set({ [tabId.toString()]: true });
-      chrome.tabs.update(tabId, { url: MENLO_PREFIX + url });
+    if (vpnMode === 'global') {
+      await handleBeforeNavigateGlobal(tabId, url);
+    } else {
+      await handleBeforeNavigateIvanti(tabId, url);
     }
   } catch (e) {
     error('[Smart Menlo] Error in handleBeforeNavigate:', e);
@@ -98,27 +18,16 @@ const handleBeforeNavigate = async (details) => {
 };
 
 const handleError = async (details) => {
-  if (!isEnabled) {
-    return;
-  }
+  if (vpnMode === 'global' && !vpnPolicyProd) return;
+  if (vpnMode === 'ivanti' && !isEnabled) return;
+
   const { tabId, url, error: err, frameId } = details;
   log(`[Smart Menlo] onErrorOccurred event triggered for URL: ${url} with error: ${err}`);
 
-  if (frameId !== 0) {
-    return;
-  }
-  if (!url.startsWith('http')) {
-    log('[Smart Menlo] Skipping error handling for non-HTTP/HTTPS URL.');
-    return;
-  }
-  if (url.startsWith(MENLO_PREFIX)) {
-    log('[Smart Menlo] Skipping error handling for Menlo URL.');
-    return;
-  }
-  if (err === 'net::ERR_ABORTED') {
-    log('[Smart Menlo] Skipping error handling for net::ERR_ABORTED.');
-    return;
-  }
+  if (frameId !== 0) return;
+  if (!url.startsWith('http')) return;
+  if (url.startsWith(MENLO_PREFIX)) return;
+  if (err === 'net::ERR_ABORTED') return;
 
   try {
     log(`[Smart Menlo] Connection failed (${err}). Redirecting to Menlo: ${url}`);
@@ -133,31 +42,27 @@ chrome.runtime.onInstalled.addListener(() => {
   log('[Smart Menlo] Extension installed or updated.');
   chrome.alarms.create(KEEPALIVE_ALARM_NAME, { periodInMinutes: 1 });
   log('[Smart Menlo] Keep-alive alarm created.');
-  chrome.storage.local.get(['isEnabled', 'forceMenloEnabled'], (data) => {
-    const updates = {};
-    if (typeof data.isEnabled === 'undefined') {
-      updates.isEnabled = true;
-      log('[Smart Menlo] isEnabled not set, setting to true.');
-    }
-    if (typeof data.forceMenloEnabled === 'undefined') {
-      updates.forceMenloEnabled = true;
-      log('[Smart Menlo] forceMenloEnabled not set, setting to true.');
-    }
-    if (Object.keys(updates).length > 0) {
-      chrome.storage.local.set(updates);
-    }
-  });
 });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === KEEPALIVE_ALARM_NAME) {
     log('[Smart Menlo] Keep-alive alarm fired. Service worker is active.');
+    checkVpnPolicy();
   }
 });
 
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace === 'local') {
     log('[Smart Menlo] storage.local onChanged event detected:', changes);
+    if (changes.vpnMode) {
+      vpnMode = changes.vpnMode.newValue;
+      log(`[Smart Menlo] vpnMode updated to: ${vpnMode}`);
+      if (vpnMode === 'global') checkVpnPolicy();
+    }
+    if (changes.vpnPolicyProd) {
+      vpnPolicyProd = changes.vpnPolicyProd.newValue;
+      log(`[Smart Menlo] vpnPolicyProd state updated to: ${vpnPolicyProd}`);
+    }
     if (changes.isEnabled) {
       isEnabled = changes.isEnabled.newValue;
       log(`[Smart Menlo] isEnabled state updated to: ${isEnabled}`);
@@ -173,6 +78,24 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
   }
 });
 
+chrome.runtime.onMessage.addListener((message) => {
+  if (message.action === 'switchPolicyMode') {
+    (async () => {
+      try {
+        log('[Smart Menlo] Switching policy mode to:', message.mode);
+        const endpoint = message.mode === 'prod'
+          ? 'https://selka.onkakao.net/sase/prod'
+          : 'https://selka.onkakao.net/sase/default';
+        await fetch(endpoint, { method: 'POST', cache: 'no-cache' });
+        await checkVpnPolicy();
+      } catch (e) {
+        log('[Smart Menlo] Policy mode switch failed:', e);
+      }
+      await chrome.storage.local.set({ vpnSwitching: false });
+    })();
+  }
+});
+
 chrome.tabs.onRemoved.addListener((tabId) => {
   log(`[Smart Menlo] Tab ${tabId} removed, clearing session data.`);
   chrome.storage.session.remove(tabId.toString()).catch(e => error(`[Smart Menlo] Error clearing session data for tab ${tabId}:`, e));
@@ -181,11 +104,15 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 const loadInitialState = async () => {
   log('[Smart Menlo] Loading initial state.');
   try {
-    const data = await chrome.storage.local.get(['forceMenloList', 'isEnabled', 'forceMenloEnabled']);
+    const data = await chrome.storage.local.get(['forceMenloList', 'vpnPolicyProd', 'isEnabled', 'forceMenloEnabled', 'vpnMode']);
     forceMenloList = data.forceMenloList || [];
+    vpnPolicyProd = data.vpnPolicyProd || false;
     isEnabled = data.isEnabled !== false;
     forceMenloEnabled = data.forceMenloEnabled !== false;
-    log('[Smart Menlo] State loaded:', { isEnabled, forceMenloEnabled, forceMenloList });
+    vpnMode = data.vpnMode || 'global';
+    log('[Smart Menlo] State loaded:', { vpnMode, vpnPolicyProd, isEnabled, forceMenloEnabled, forceMenloList });
+    await chrome.storage.local.set({ vpnSwitching: false });
+    await checkVpnPolicy();
   } catch (e) {
     error('[Smart Menlo] Error loading initial state:', e);
   }

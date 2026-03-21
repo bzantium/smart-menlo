@@ -4,7 +4,7 @@
     "description": "The name of the application"
   },
   "appDesc": {
-    "message": "接続に失敗したサイトを自動的にMenlo Security URLにリダイレクトします。",
+    "message": "VPNポリシーに基づいてMenlo Securityリダイレクトを管理します。",
     "description": "The description of the application"
   },
   "popupTitle": {
@@ -16,19 +16,11 @@
     "description": "Header of the popup"
   },
   "popupDesc": {
-    "message": "ウェブサイトへの接続に失敗した場合、自動的にMenlo Security経Dで再接続します。",
+    "message": "VPNポリシーが有効な場合、自動リダイレクトされないURLをMenlo Security経由で接続します。",
     "description": "Description in the popup"
   },
-  "enable": {
-    "message": "有効",
-    "description": "Enable switch status"
-  },
-  "disable": {
-    "message": "無効",
-    "description": "Disable switch status"
-  },
   "forceMenloListTitle": {
-    "message": "常にMenloで開くURLリスト",
+    "message": "Menloリダイレクト URLリスト",
     "description": "Title for the force menlo list"
   },
   "newUrlInputPlaceholder": {
@@ -70,5 +62,57 @@
   "langZh": {
     "message": "中国語",
     "description": "Chinese language"
+  },
+  "vpnAppLabel": {
+    "message": "VPN APP",
+    "description": "Label for VPN app selector"
+  },
+  "enable": {
+    "message": "有効",
+    "description": "Enabled status text"
+  },
+  "disable": {
+    "message": "無効",
+    "description": "Disabled status text"
+  },
+  "policyLabel": {
+    "message": "ポリシー",
+    "description": "Label for VPN policy status"
+  },
+  "policyActive": {
+    "message": "有効",
+    "description": "Policy active status text"
+  },
+  "policyInactive": {
+    "message": "無効",
+    "description": "Policy inactive status text"
+  },
+  "popupDescGlobal": {
+    "message": "VPNポリシーに基づいてMenloリダイレクトを自動管理します。ポリシーが有効な場合、以下のURLは常にMenlo経由で接続されます。",
+    "description": "Description for Global mode"
+  },
+  "popupDescIvanti": {
+    "message": "Menlo Securityリダイレクトを手動で制御します。拡張機能のオン/オフを切り替え、Menlo経由で接続するURLを管理します。",
+    "description": "Description for Ivanti mode"
+  },
+  "ivantiToggleLabel": {
+    "message": "Menloリダイレクト",
+    "description": "Label for the Ivanti enable/disable toggle"
+  },
+  "forceMenloListDescGlobal": {
+    "message": "ポリシーが有効な場合、これらのURLは常にMenlo経由で接続されます。",
+    "description": "Force list description for Global mode"
+  },
+  "forceMenloListDescIvanti": {
+    "message": "有効にすると、これらのURLは常にMenlo経由で接続されます。",
+    "description": "Force list description for Ivanti mode"
+  },
+  "modeAutomatic": {
+    "message": "自動",
+    "description": "Automatic mode badge text"
+  },
+  "modeManual": {
+    "message": "手動",
+    "description": "Manual mode badge text"
   }
 }

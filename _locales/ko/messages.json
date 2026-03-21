@@ -4,7 +4,7 @@
     "description": "The name of the application"
   },
   "appDesc": {
-    "message": "접속에 실패한 사이트를 자동으로 Menlo Security URL로 리디렉션합니다.",
+    "message": "VPN 정책에 따라 Menlo Security 리디렉션을 관리합니다.",
     "description": "The description of the application"
   },
   "popupTitle": {
@@ -16,19 +16,11 @@
     "description": "Header of the popup"
   },
   "popupDesc": {
-    "message": "웹사이트 접속 실패 시, 자동으로 Menlo Security를 통해 재접속합니다.",
+    "message": "VPN 정책이 활성화되면 자동 리디렉션이 안 되는 URL을 Menlo Security를 통해 접속합니다.",
     "description": "Description in the popup"
   },
-  "enable": {
-    "message": "활성화",
-    "description": "Enable switch status"
-  },
-  "disable": {
-    "message": "비활성화",
-    "description": "Disable switch status"
-  },
   "forceMenloListTitle": {
-    "message": "항상 Menlo로 접속할 URL 목록",
+    "message": "Menlo 리디렉션 URL 목록",
     "description": "Title for the force menlo list"
   },
   "newUrlInputPlaceholder": {
@@ -70,5 +62,57 @@
   "langZh": {
     "message": "중국어",
     "description": "Chinese language"
+  },
+  "vpnAppLabel": {
+    "message": "VPN APP",
+    "description": "Label for VPN app selector"
+  },
+  "enable": {
+    "message": "활성화",
+    "description": "Enabled status text"
+  },
+  "disable": {
+    "message": "비활성화",
+    "description": "Disabled status text"
+  },
+  "policyLabel": {
+    "message": "정책",
+    "description": "Label for VPN policy status"
+  },
+  "policyActive": {
+    "message": "활성화",
+    "description": "Policy active status text"
+  },
+  "policyInactive": {
+    "message": "비활성화",
+    "description": "Policy inactive status text"
+  },
+  "popupDescGlobal": {
+    "message": "VPN 정책에 따라 Menlo 리디렉션을 자동으로 관리합니다. 정책이 활성 상태일 때 아래 목록의 URL은 항상 Menlo를 통해 접속됩니다.",
+    "description": "Description for Global mode"
+  },
+  "popupDescIvanti": {
+    "message": "Menlo Security 리디렉션을 수동으로 제어합니다. 확장 프로그램을 켜거나 끄고, Menlo를 통해 접속할 URL을 관리합니다.",
+    "description": "Description for Ivanti mode"
+  },
+  "ivantiToggleLabel": {
+    "message": "Menlo 리디렉션",
+    "description": "Label for the Ivanti enable/disable toggle"
+  },
+  "forceMenloListDescGlobal": {
+    "message": "정책이 활성 상태일 때 이 URL들은 항상 Menlo를 통해 접속됩니다.",
+    "description": "Force list description for Global mode"
+  },
+  "forceMenloListDescIvanti": {
+    "message": "활성화되면 이 URL들은 항상 Menlo를 통해 접속됩니다.",
+    "description": "Force list description for Ivanti mode"
+  },
+  "modeAutomatic": {
+    "message": "자동",
+    "description": "Automatic mode badge text"
+  },
+  "modeManual": {
+    "message": "수동",
+    "description": "Manual mode badge text"
   }
 }

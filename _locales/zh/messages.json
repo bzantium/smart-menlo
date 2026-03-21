@@ -4,7 +4,7 @@
     "description": "The name of the application"
   },
   "appDesc": {
-    "message": "自动将连接失败的网站重定向到Menlo Security URL。",
+    "message": "根据VPN策略管理Menlo Security重定向。",
     "description": "The description of the application"
   },
   "popupTitle": {
@@ -16,19 +16,11 @@
     "description": "Header of the popup"
   },
   "popupDesc": {
-    "message": "当网站连接失败时，通过Menlo Security自动重新连接。",
+    "message": "当VPN策略激活时，将未自动重定向的URL通过Menlo Security访问。",
     "description": "Description in the popup"
   },
-  "enable": {
-    "message": "启用",
-    "description": "Enable switch status"
-  },
-  "disable": {
-    "message": "禁用",
-    "description": "Disable switch status"
-  },
   "forceMenloListTitle": {
-    "message": "始终使用Menlo打开的URL列表",
+    "message": "Menlo重定向URL列表",
     "description": "Title for the force menlo list"
   },
   "newUrlInputPlaceholder": {
@@ -70,5 +62,57 @@
   "langZh": {
     "message": "中文",
     "description": "Chinese language"
+  },
+  "vpnAppLabel": {
+    "message": "VPN APP",
+    "description": "Label for VPN app selector"
+  },
+  "enable": {
+    "message": "已启用",
+    "description": "Enabled status text"
+  },
+  "disable": {
+    "message": "已禁用",
+    "description": "Disabled status text"
+  },
+  "policyLabel": {
+    "message": "策略",
+    "description": "Label for VPN policy status"
+  },
+  "policyActive": {
+    "message": "已激活",
+    "description": "Policy active status text"
+  },
+  "policyInactive": {
+    "message": "未激活",
+    "description": "Policy inactive status text"
+  },
+  "popupDescGlobal": {
+    "message": "根据VPN策略自动管理Menlo重定向。当策略处于激活状态时，以下URL始终通过Menlo路由。",
+    "description": "Description for Global mode"
+  },
+  "popupDescIvanti": {
+    "message": "手动控制Menlo Security重定向。切换扩展的启用/禁用，并管理通过Menlo路由的URL。",
+    "description": "Description for Ivanti mode"
+  },
+  "ivantiToggleLabel": {
+    "message": "Menlo重定向",
+    "description": "Label for the Ivanti enable/disable toggle"
+  },
+  "forceMenloListDescGlobal": {
+    "message": "当策略激活时，这些URL始终通过Menlo路由。",
+    "description": "Force list description for Global mode"
+  },
+  "forceMenloListDescIvanti": {
+    "message": "启用后，这些URL始终通过Menlo路由。",
+    "description": "Force list description for Ivanti mode"
+  },
+  "modeAutomatic": {
+    "message": "自动",
+    "description": "Automatic mode badge text"
+  },
+  "modeManual": {
+    "message": "手动",
+    "description": "Manual mode badge text"
   }
 }
