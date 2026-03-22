@@ -34,8 +34,8 @@ const redirectTab = async (tabId, url) => {
 
 const setIconWithDot = async (color) => {
   const size = 48;
-  const dotRadius = 9;
-  const dotX = size - dotRadius - 2;
+  const dotRadius = 10;
+  const dotX = size - dotRadius;
   const dotY = size - dotRadius;
 
   try {
