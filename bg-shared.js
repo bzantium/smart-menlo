@@ -35,8 +35,8 @@ const redirectTab = async (tabId, url) => {
 const setIconWithDot = async (color) => {
   const size = 48;
   const dotRadius = 10;
-  const dotX = size - dotRadius;
-  const dotY = size - dotRadius;
+  const dotX = size - dotRadius - 2;
+  const dotY = size - dotRadius - 2;
 
   try {
     const response = await fetch(chrome.runtime.getURL('assets/icon48.png'));
