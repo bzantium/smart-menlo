@@ -1,3 +1,5 @@
+const MENLO_PREFIX = "https://safe.menlosecurity.com/";
+
 document.addEventListener('DOMContentLoaded', () => {
   const elements = {
     forceMenloListDiv: document.getElementById('forceMenloList'),
@@ -16,7 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
     policyModeSelect: document.getElementById('policyModeSelect'),
     // Ivanti-specific
     toggleSwitch: document.getElementById('toggleSwitch'),
-    switchStatus: document.getElementById('switchStatus'),
     forceMenloToggle: document.getElementById('forceMenloToggle'),
   };
 
@@ -30,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize mode-specific modules
   PopupGlobal.init(elements, i18n);
-  PopupIvanti.init(elements, i18n);
+  PopupIvanti.init(elements);
 
   const loadTranslations = async (locale) => {
     try {
@@ -81,27 +82,34 @@ document.addEventListener('DOMContentLoaded', () => {
     applyTranslations();
   });
 
-  const updateModeUI = (mode) => {
+  const getForceListKey = (mode) => mode === 'global' ? 'forceMenloEnabledGlobal' : 'forceMenloEnabledIvanti';
+
+  const updateModeUI = async (mode) => {
     currentMode = mode;
     const isGlobal = mode === 'global';
 
     elements.globalSection.style.display = isGlobal ? '' : 'none';
     elements.ivantiSection.style.display = isGlobal ? 'none' : '';
 
-    // Ivanti status text
-    if (!isGlobal) {
-      PopupIvanti.updateStatusText(elements.toggleSwitch.checked);
-    }
+    // Load mode-specific force list toggle state
+    const key = getForceListKey(mode);
+    const data = await chrome.storage.local.get([key]);
+    elements.forceMenloToggle.checked = data[key] !== false;
   };
 
   elements.vpnModeSelect.addEventListener('change', async () => {
     const mode = elements.vpnModeSelect.value;
     await chrome.storage.local.set({ vpnMode: mode });
-    updateModeUI(mode);
+    await updateModeUI(mode);
     if (mode === 'global') {
       const result = await PopupGlobal.checkPolicy();
       PopupGlobal.updateUI(result);
     }
+  });
+
+  elements.forceMenloToggle.addEventListener('change', async () => {
+    const key = getForceListKey(currentMode);
+    await chrome.storage.local.set({ [key]: elements.forceMenloToggle.checked });
   });
 
   // Listen for switching completion
@@ -129,16 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pattern.startsWith('.') || pattern.endsWith('.') || pattern.startsWith('/')) return false;
     if (pattern.includes('/') && pattern.split('/')[0] === '') return false;
     return true;
-  };
-
-  const loadAndRenderList = async () => {
-    try {
-      const data = await chrome.storage.local.get('forceMenloList');
-      forceMenloList = data.forceMenloList || [];
-      renderList();
-    } catch (e) {
-      console.error('[Smart Menlo] Error loading force list:', e);
-    }
   };
 
   const renderList = () => {
@@ -244,7 +242,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (tabs && tabs.length > 0) {
         const currentTab = tabs[0];
         const currentUrl = currentTab.url;
-        const MENLO_PREFIX = "https://safe.menlosecurity.com/";
         if (currentUrl.startsWith('http') && !currentUrl.startsWith(MENLO_PREFIX)) {
           const menloUrl = MENLO_PREFIX + currentUrl;
           await chrome.storage.session.set({ [currentTab.id.toString()]: true });
@@ -260,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   const initializePopup = async () => {
-    const data = await chrome.storage.local.get(['language', 'vpnMode', 'isEnabled', 'forceMenloEnabled']);
+    const data = await chrome.storage.local.get(['language', 'vpnMode', 'isEnabled', 'forceMenloList']);
 
     const lang = data.language || chrome.i18n.getUILanguage().split('-')[0] || 'en';
     elements.languageSelect.value = lang;
@@ -270,28 +267,27 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.vpnModeSelect.value = mode;
 
     elements.toggleSwitch.checked = data.isEnabled !== false;
-    elements.forceMenloToggle.checked = data.forceMenloEnabled !== false;
 
     // Apply mode UI immediately before translations to avoid flash
-    updateModeUI(mode);
+    await updateModeUI(mode);
 
     await loadTranslations(lang);
     applyTranslations();
 
     if (mode === 'global') {
-      const stored = await chrome.storage.local.get(['vpnSwitching', 'vpnPolicyProd']);
+      const stored = await chrome.storage.local.get(['vpnSwitching', 'vpnConnected', 'vpnPolicy']);
       if (stored.vpnSwitching) {
         PopupGlobal.showSwitching(stored.vpnSwitching);
       } else {
         // Show cached state immediately
-        const cachedPolicy = stored.vpnPolicyProd ? 'prod' : 'default';
-        PopupGlobal.updateUI({ connected: true, policy: cachedPolicy });
+        PopupGlobal.updateUI({ connected: !!stored.vpnConnected, policy: stored.vpnPolicy || '' });
         // Then refresh from server
         PopupGlobal.checkPolicy().then(result => PopupGlobal.updateUI(result));
       }
     }
 
-    await loadAndRenderList();
+    forceMenloList = data.forceMenloList || [];
+    renderList();
   };
 
   initializePopup();

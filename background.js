@@ -31,8 +31,7 @@ const handleError = async (details) => {
 
   try {
     log(`[Smart Menlo] Connection failed (${err}). Redirecting to Menlo: ${url}`);
-    await chrome.storage.session.set({ [tabId.toString()]: true });
-    chrome.tabs.update(tabId, { url: MENLO_PREFIX + url });
+    await redirectTab(tabId, MENLO_PREFIX + url);
   } catch (e) {
     error('[Smart Menlo] Error in handleError:', e);
   }
@@ -58,6 +57,7 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
       vpnMode = changes.vpnMode.newValue;
       log(`[Smart Menlo] vpnMode updated to: ${vpnMode}`);
       if (vpnMode === 'global') checkVpnPolicy();
+      updateBadge();
     }
     if (changes.vpnPolicyProd) {
       vpnPolicyProd = changes.vpnPolicyProd.newValue;
@@ -66,10 +66,15 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
     if (changes.isEnabled) {
       isEnabled = changes.isEnabled.newValue;
       log(`[Smart Menlo] isEnabled state updated to: ${isEnabled}`);
+      updateBadge();
     }
-    if (changes.forceMenloEnabled) {
-      forceMenloEnabled = changes.forceMenloEnabled.newValue;
-      log(`[Smart Menlo] forceMenloEnabled state updated to: ${forceMenloEnabled}`);
+    if (changes.forceMenloEnabledGlobal) {
+      forceMenloEnabledGlobal = changes.forceMenloEnabledGlobal.newValue;
+      log(`[Smart Menlo] forceMenloEnabledGlobal updated to: ${forceMenloEnabledGlobal}`);
+    }
+    if (changes.forceMenloEnabledIvanti) {
+      forceMenloEnabledIvanti = changes.forceMenloEnabledIvanti.newValue;
+      log(`[Smart Menlo] forceMenloEnabledIvanti updated to: ${forceMenloEnabledIvanti}`);
     }
     if (changes.forceMenloList) {
       forceMenloList = changes.forceMenloList.newValue || [];
@@ -78,21 +83,28 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
   }
 });
 
-chrome.runtime.onMessage.addListener((message) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'switchPolicyMode') {
     (async () => {
       try {
         log('[Smart Menlo] Switching policy mode to:', message.mode);
+        setIconWithDot('#e67e22');
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
         const endpoint = message.mode === 'prod'
           ? 'https://selka.onkakao.net/sase/prod'
           : 'https://selka.onkakao.net/sase/default';
-        await fetch(endpoint, { method: 'POST', cache: 'no-cache' });
+        await fetch(endpoint, { method: 'POST', cache: 'no-cache', signal: controller.signal });
+        clearTimeout(timeoutId);
         await checkVpnPolicy();
       } catch (e) {
         log('[Smart Menlo] Policy mode switch failed:', e);
       }
       await chrome.storage.local.set({ vpnSwitching: false });
+      updateBadge();
+      sendResponse({ done: true });
     })();
+    return true; // keep message channel open for async response
   }
 });
 
@@ -104,15 +116,19 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 const loadInitialState = async () => {
   log('[Smart Menlo] Loading initial state.');
   try {
-    const data = await chrome.storage.local.get(['forceMenloList', 'vpnPolicyProd', 'isEnabled', 'forceMenloEnabled', 'vpnMode']);
+    const data = await chrome.storage.local.get(['forceMenloList', 'vpnPolicyProd', 'isEnabled', 'forceMenloEnabledGlobal', 'forceMenloEnabledIvanti', 'vpnMode', 'vpnSwitching']);
     forceMenloList = data.forceMenloList || [];
     vpnPolicyProd = data.vpnPolicyProd || false;
     isEnabled = data.isEnabled !== false;
-    forceMenloEnabled = data.forceMenloEnabled !== false;
+    forceMenloEnabledGlobal = data.forceMenloEnabledGlobal !== false;
+    forceMenloEnabledIvanti = data.forceMenloEnabledIvanti !== false;
     vpnMode = data.vpnMode || 'global';
-    log('[Smart Menlo] State loaded:', { vpnMode, vpnPolicyProd, isEnabled, forceMenloEnabled, forceMenloList });
-    await chrome.storage.local.set({ vpnSwitching: false });
+    log('[Smart Menlo] State loaded:', { vpnMode, vpnPolicyProd, isEnabled, forceMenloEnabledGlobal, forceMenloEnabledIvanti, forceMenloList });
+    if (data.vpnSwitching) {
+      await chrome.storage.local.set({ vpnSwitching: false });
+    }
     await checkVpnPolicy();
+    updateBadge();
   } catch (e) {
     error('[Smart Menlo] Error loading initial state:', e);
   }

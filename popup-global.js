@@ -33,7 +33,7 @@ const PopupGlobal = {
     this.refreshPolicyBtn.disabled = true;
     const from = targetMode === 'prod' ? 'dev' : 'prod';
     const to = targetMode === 'prod' ? 'prod' : 'dev';
-    this.vpnPolicyText.textContent = `Switching (${from} -> ${to})`;
+    this.vpnPolicyText.textContent = `Switching (${from} → ${to})`;
     this.vpnPolicyBanner.className = 'vpn-policy-banner switching';
   },
 
@@ -42,7 +42,7 @@ const PopupGlobal = {
     this.refreshPolicyBtn.disabled = false;
     if (connected) {
       const isProd = policy === 'prod';
-      this.vpnPolicyBanner.className = 'vpn-policy-banner active';
+      this.vpnPolicyBanner.className = 'vpn-policy-banner ' + (isProd ? 'prod' : 'dev');
       this.vpnPolicyText.textContent = `VPN: On (${isProd ? 'prod' : 'dev'})`;
       this.policyModeSelect.value = isProd ? 'prod' : 'default';
       this.policyModeSelect.disabled = false;
@@ -65,13 +65,13 @@ const PopupGlobal = {
       if (response.ok) {
         const data = await response.json();
         const policy = data.policy || '';
-        await chrome.storage.local.set({ vpnPolicyProd: policy === 'prod' });
+        await chrome.storage.local.set({ vpnPolicyProd: policy === 'prod', vpnConnected: true, vpnPolicy: policy });
         return { connected: true, policy };
       }
     } catch (e) {
       console.log('[Smart Menlo] Popup VPN policy check failed:', e);
     }
-    await chrome.storage.local.set({ vpnPolicyProd: false });
+    await chrome.storage.local.set({ vpnPolicyProd: false, vpnConnected: false, vpnPolicy: '' });
     return { connected: false, policy: '' };
   }
 };

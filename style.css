@@ -185,8 +185,16 @@ input:checked + .mini-slider:before {
   font-weight: bold;
 }
 
-.vpn-policy-banner.active {
+.vpn-policy-banner.prod {
+  background-color: #e8f5e9;
+  border-color: #c8e6c9;
   color: #2e7d32;
+}
+
+.vpn-policy-banner.dev {
+  background-color: #e3f2fd;
+  border-color: #bbdefb;
+  color: #1565c0;
 }
 
 .vpn-policy-banner.inactive {
@@ -194,6 +202,8 @@ input:checked + .mini-slider:before {
 }
 
 .vpn-policy-banner.switching {
+  background-color: #fff3e0;
+  border-color: #ffe0b2;
   color: #e67e22;
 }
 
@@ -221,7 +231,7 @@ input:checked + .mini-slider:before {
   transition: transform 0.3s;
 }
 
-.refresh-btn:hover {
+.refresh-btn:hover:not(:disabled) {
   color: #333;
 }
 
@@ -254,6 +264,10 @@ input:checked + .mini-slider:before {
 
 .list-item span {
   flex-grow: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -269,6 +283,7 @@ input:checked + .mini-slider:before {
   color: #d63328;
   cursor: pointer;
   font-size: 16px;
+  flex-shrink: 0;
 }
 
 .list-action {

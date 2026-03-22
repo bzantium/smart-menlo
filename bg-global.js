@@ -12,61 +12,44 @@ const checkVpnPolicy = async () => {
       const isProd = data.policy === 'prod';
       if (vpnPolicyProd !== isProd) {
         vpnPolicyProd = isProd;
-        await chrome.storage.local.set({ vpnPolicyProd: isProd });
+        await chrome.storage.local.set({ vpnPolicyProd: isProd, vpnConnected: true, vpnPolicy: data.policy });
         log(`[Smart Menlo] VPN policy updated: ${data.policy} (auto-redirect: ${isProd ? 'ON' : 'OFF'})`);
+        updateBadge();
       }
     } else {
       if (vpnPolicyProd !== false) {
         vpnPolicyProd = false;
-        await chrome.storage.local.set({ vpnPolicyProd: false });
-        log('[Smart Menlo] VPN policy endpoint not reachable, setting vpnPolicyProd to false.');
+        await chrome.storage.local.set({ vpnPolicyProd: false, vpnConnected: false, vpnPolicy: '' });
+        updateBadge();
       }
     }
   } catch (e) {
     if (vpnPolicyProd !== false) {
       vpnPolicyProd = false;
-      await chrome.storage.local.set({ vpnPolicyProd: false });
+      await chrome.storage.local.set({ vpnPolicyProd: false, vpnConnected: false, vpnPolicy: '' });
+      updateBadge();
     }
-    log('[Smart Menlo] VPN policy check failed (endpoint unreachable), vpnPolicyProd set to false.');
   }
 };
 
 const handleBeforeNavigateGlobal = async (tabId, url) => {
-  const tabState = await chrome.storage.session.get(tabId.toString());
-  if (tabState[tabId.toString()]) {
-    log(`[Smart Menlo] Tab ${tabId} has a session flag, removing it and allowing navigation.`);
-    await chrome.storage.session.remove(tabId.toString());
-    return;
-  }
+  if (await checkSessionFlag(tabId)) return;
 
   if (url.startsWith(MENLO_PREFIX)) {
-    log('[Smart Menlo] Detected Menlo URL:', url);
     const pathAfterPrefix = url.substring(MENLO_PREFIX.length);
     if (pathAfterPrefix.startsWith('http://') || pathAfterPrefix.startsWith('https://')) {
-      const originalUrlString = pathAfterPrefix;
-      log('[Smart Menlo] Extracted original URL:', originalUrlString);
-
       if (!vpnPolicyProd) {
-        // Not in prod — strip Menlo prefix (no auto-redirect needed)
-        log('[Smart Menlo] VPN policy is not prod. Stripping Menlo prefix.');
-        await chrome.storage.session.set({ [tabId.toString()]: true });
-        chrome.tabs.update(tabId, { url: originalUrlString });
+        await redirectTab(tabId, pathAfterPrefix);
         return;
       }
-
       // In prod — VPN auto-redirect is active, don't interfere
-      log('[Smart Menlo] VPN auto-redirect active (prod). Allowing Menlo URL.');
     }
     return;
   }
 
-  if (!vpnPolicyProd) {
-    return;
-  }
+  if (!vpnPolicyProd) return;
 
   if (isUrlForced(url)) {
-    log(`[Smart Menlo] URL is in force list. Redirecting tab ${tabId} to Menlo.`);
-    await chrome.storage.session.set({ [tabId.toString()]: true });
-    chrome.tabs.update(tabId, { url: MENLO_PREFIX + url });
+    await redirectTab(tabId, MENLO_PREFIX + url);
   }
 };
