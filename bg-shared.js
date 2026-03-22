@@ -77,7 +77,7 @@ const updateBadge = () => {
       });
     }
   } else {
-    setIconWithDot(isEnabled ? '#2e7d32' : '#999');
+    chrome.action.setIcon({ path: { 48: 'assets/icon48.png' } });
   }
 };
 
