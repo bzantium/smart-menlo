@@ -127,8 +127,8 @@ const loadInitialState = async () => {
     if (data.vpnSwitching) {
       await chrome.storage.local.set({ vpnSwitching: false });
     }
-    await checkVpnPolicy();
     updateBadge();
+    checkVpnPolicy();
   } catch (e) {
     error('[Smart Menlo] Error loading initial state:', e);
   }
