@@ -62,6 +62,11 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
     if (changes.vpnPolicyProd) {
       vpnPolicyProd = changes.vpnPolicyProd.newValue;
       log(`[Smart Menlo] vpnPolicyProd state updated to: ${vpnPolicyProd}`);
+      updateBadge();
+    }
+    if (changes.vpnConnected) {
+      log(`[Smart Menlo] vpnConnected updated to: ${changes.vpnConnected.newValue}`);
+      updateBadge();
     }
     if (changes.isEnabled) {
       isEnabled = changes.isEnabled.newValue;

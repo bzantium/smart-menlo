@@ -70,10 +70,14 @@ const updateBadge = () => {
   chrome.action.setBadgeText({ text: '' });
   if (vpnMode === 'global') {
     if (vpnPolicyProd) {
-      setIconWithDot('#2e7d32');
+      setIconWithDot('#4caf50');
     } else {
       chrome.storage.local.get(['vpnConnected'], (data) => {
-        setIconWithDot(data.vpnConnected ? '#1565c0' : '#999');
+        if (data.vpnConnected) {
+          setIconWithDot('#42a5f5');
+        } else {
+          chrome.action.setIcon({ path: { 48: 'assets/icon48.png' } });
+        }
       });
     }
   } else {
