@@ -1,9 +1,0 @@
-{
-  "name": "com.smartmenlo.sessiond",
-  "description": "Smart Menlo session daemon",
-  "path": "$HOME/.smartmenlo/sessiond",
-  "type": "stdio",
-  "allowed_origins": [
-    "chrome-extension://aieooghkpkopbpjmlcnfcckjbenenfmd/"
-  ]
-}
