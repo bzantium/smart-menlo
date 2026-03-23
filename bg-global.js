@@ -1,35 +1,71 @@
 const VPN_POLICY_URL = "https://selka.onkakao.net/sase/policy";
+const NATIVE_HOST_NAME = "com.smartmenlo.sessiond";
+const VPN_SESSION_DURATION = 9 * 60 * 60 * 1000;
+const VPN_DISCONNECTED_STATE = { vpnPolicyProd: false, vpnConnected: false, vpnPolicy: '', vpnSessionStart: 0 };
+
+const queryNativeVpnSession = () => {
+  return new Promise((resolve) => {
+    try {
+      chrome.runtime.sendNativeMessage(NATIVE_HOST_NAME, { action: "getVpnSession" }, (response) => {
+        if (chrome.runtime.lastError) {
+          log('[Smart Menlo] Native host unavailable:', chrome.runtime.lastError.message);
+          resolve(null);
+        } else {
+          resolve(response);
+        }
+      });
+    } catch (e) {
+      resolve(null);
+    }
+  });
+};
+
+const clearVpnState = async () => {
+  vpnConnected = false;
+  vpnPolicyProd = false;
+  await chrome.storage.local.set(VPN_DISCONNECTED_STATE);
+  updateBadge();
+};
 
 const checkVpnPolicy = async () => {
   if (vpnMode !== 'global') return;
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
-    const response = await fetch(VPN_POLICY_URL, { cache: 'no-cache', signal: controller.signal });
+    const [response, stored] = await Promise.all([
+      fetch(VPN_POLICY_URL, { cache: 'no-cache', signal: controller.signal }),
+      chrome.storage.local.get('vpnSessionStart')
+    ]);
     clearTimeout(timeoutId);
     if (response.ok) {
       const data = await response.json();
       const isProd = data.policy === 'prod';
       vpnConnected = true;
+      const storageUpdate = { vpnConnected: true, vpnPolicy: data.policy };
+
+      if (!stored.vpnSessionStart) {
+        const nativeInfo = await queryNativeVpnSession();
+        if (nativeInfo && nativeInfo.connected && nativeInfo.sessionStart) {
+          storageUpdate.vpnSessionStart = nativeInfo.sessionStart;
+          log('[Smart Menlo] VPN session start from native host:', new Date(nativeInfo.sessionStart).toLocaleTimeString());
+        } else {
+          storageUpdate.vpnSessionStart = Date.now();
+          log('[Smart Menlo] VPN session start estimated (native host unavailable).');
+        }
+      }
+
       if (vpnPolicyProd !== isProd) {
         vpnPolicyProd = isProd;
-        await chrome.storage.local.set({ vpnPolicyProd: isProd, vpnConnected: true, vpnPolicy: data.policy });
+        storageUpdate.vpnPolicyProd = isProd;
         log(`[Smart Menlo] VPN policy updated: ${data.policy} (auto-redirect: ${isProd ? 'ON' : 'OFF'})`);
-      } else {
-        await chrome.storage.local.set({ vpnConnected: true, vpnPolicy: data.policy });
       }
+      await chrome.storage.local.set(storageUpdate);
       updateBadge();
     } else {
-      vpnConnected = false;
-      vpnPolicyProd = false;
-      await chrome.storage.local.set({ vpnPolicyProd: false, vpnConnected: false, vpnPolicy: '' });
-      updateBadge();
+      await clearVpnState();
     }
   } catch (e) {
-    vpnConnected = false;
-    vpnPolicyProd = false;
-    await chrome.storage.local.set({ vpnPolicyProd: false, vpnConnected: false, vpnPolicy: '' });
-    updateBadge();
+    await clearVpnState();
   }
 };
 
@@ -43,7 +79,6 @@ const handleBeforeNavigateGlobal = async (tabId, url) => {
         await redirectTab(tabId, pathAfterPrefix);
         return;
       }
-      // In prod — VPN auto-redirect is active, don't interfere
     }
     return;
   }

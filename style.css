@@ -174,8 +174,7 @@ input:checked + .mini-slider:before {
 
 .vpn-policy-banner {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   padding: 10px 10px 10px 18px;
   background-color: #fff;
   border: 1px solid #ddd;
@@ -185,10 +184,57 @@ input:checked + .mini-slider:before {
   font-weight: bold;
 }
 
+.vpn-banner-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vpn-timer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.vpn-timer-bar {
+  flex: 1;
+  height: 6px;
+  background-color: rgba(0,0,0,0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.vpn-timer-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1s linear, background-color 0.5s;
+  width: 100%;
+}
+
+.vpn-policy-banner.prod .vpn-timer-fill {
+  background-color: #e67e22;
+}
+
+.vpn-policy-banner.dev .vpn-timer-fill {
+  background-color: #42a5f5;
+}
+
+.vpn-timer-text {
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  min-width: 42px;
+  text-align: right;
+  opacity: 0.7;
+}
+
 .vpn-policy-banner.prod {
-  background-color: #e8f5e9;
-  border-color: #c8e6c9;
-  color: #2e7d32;
+  background-color: #fff3e0;
+  border-color: #ffe0b2;
+  color: #e67e22;
 }
 
 .vpn-policy-banner.dev {
@@ -202,9 +248,9 @@ input:checked + .mini-slider:before {
 }
 
 .vpn-policy-banner.switching {
-  background-color: #fff3e0;
-  border-color: #ffe0b2;
-  color: #e67e22;
+  background-color: #f3e5f5;
+  border-color: #e1bee7;
+  color: #8e24aa;
 }
 
 .policy-controls {

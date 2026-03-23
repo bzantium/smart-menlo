@@ -44,6 +44,8 @@ Designed for **Global Protect** VPN users.
 
 - **VPN Status Detection**: Automatically detects whether the VPN is connected by checking the policy endpoint. Displays `VPN: On (prod/dev)` or `VPN: Off` in the popup.
 - **prod/dev Mode Switching**: Switch between `prod` and `dev` VPN modes directly from the popup — no need to visit the admin page.
+- **Session Timer**: Shows remaining VPN session time with a progress bar. If the native helper is installed, it reads the exact connection time from GlobalProtect logs; otherwise it estimates from when the extension first detects the connection.
+- **Expiry Alert**: The toolbar icon dot blinks as the session nears expiry — slow blink at 1 hour, fast blink at 10 minutes.
 - **Force List**: When the VPN is in `prod` mode, URLs in the force list are always routed through Menlo. This fills the gap for sites that the VPN auto-redirect misses.
 - **Intelligent Link Handling**: Strips the Menlo prefix from URLs that are not in the force list, giving you direct access. When `prod` is off, all Menlo prefixes are stripped automatically.
 
@@ -75,6 +77,18 @@ Designed for **Ivanti** VPN users.
 4. Click **Load unpacked** and select the cloned repository folder.
 5. (Optional) Pin the extension to your toolbar for quick access.
 
+#### Session Timer Setup (Optional, Global Mode only)
+
+To get accurate VPN session remaining time, install the native helper:
+
+```sh
+bash install.sh
+```
+
+This registers a lightweight script that reads the GlobalProtect event log to determine when the current VPN session started. It auto-detects your extension ID and installs for all detected Chromium-based browsers (Chrome, Arc, Chromium, Edge).
+
+- **Without the helper**, the timer falls back to estimating from when the extension first detects the VPN connection.
+
 ---
 
 ### Force List Rules
@@ -92,14 +106,18 @@ Designed for **Ivanti** VPN users.
 smart-menlo/
 ├── manifest.json          # Chrome Extension Manifest V3 config
 ├── background.js          # Service worker entry point (dispatcher)
-├── bg-shared.js           # Shared constants, state, URL matching logic
-├── bg-global.js           # Global mode: VPN policy check, navigation handler
+├── bg-shared.js           # Shared constants, state, URL matching, icon rendering
+├── bg-global.js           # Global mode: VPN policy check, native host query
 ├── bg-ivanti.js           # Ivanti mode: navigation handler
 ├── popup.html             # Extension popup UI
 ├── popup.js               # Shared popup logic (i18n, force list, mode switching)
-├── popup-global.js        # Global mode UI (VPN status, prod/dev selector)
+├── popup-global.js        # Global mode UI (VPN status, session timer)
 ├── popup-ivanti.js        # Ivanti mode UI (enable toggle)
 ├── style.css              # Popup styles
+├── install.sh             # Native helper installer (session timer)
+├── native/                # Native messaging host source
+│   ├── com.smartmenlo.sessiond.py    # Python script (reads GP logs)
+│   └── com.smartmenlo.sessiond.json  # Chrome native messaging manifest
 ├── _locales/              # Translations (en, ko, ja, zh)
 └── assets/                # Extension icons
 ```

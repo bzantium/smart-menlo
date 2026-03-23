@@ -14,13 +14,21 @@
     <!-- Global mode: VPN status + mode switch -->
     <div id="globalSection">
       <div id="vpnPolicyBanner" class="vpn-policy-banner">
-        <span id="vpnPolicyText"></span>
-        <div class="policy-controls">
-          <select id="policyModeSelect" class="policy-mode-select">
-            <option value="prod">prod</option>
-            <option value="default">dev</option>
-          </select>
-          <button id="refreshPolicyBtn" class="refresh-btn" title="Refresh">&#x21bb;</button>
+        <div class="vpn-banner-top">
+          <span id="vpnPolicyText"></span>
+          <div class="policy-controls">
+            <select id="policyModeSelect" class="policy-mode-select">
+              <option value="prod">prod</option>
+              <option value="default">dev</option>
+            </select>
+            <button id="refreshPolicyBtn" class="refresh-btn" title="Refresh">&#x21bb;</button>
+          </div>
+        </div>
+        <div id="vpnTimerRow" class="vpn-timer-row" style="display: none;">
+          <div class="vpn-timer-bar">
+            <div id="vpnTimerFill" class="vpn-timer-fill"></div>
+          </div>
+          <span id="vpnTimerText" class="vpn-timer-text"></span>
         </div>
       </div>
     </div>

@@ -1,14 +1,20 @@
+const VPN_SESSION_DURATION = 9 * 60 * 60 * 1000; // 9 hours
+
 const PopupGlobal = {
   vpnPolicyBanner: null,
   vpnPolicyText: null,
   refreshPolicyBtn: null,
   policyModeSelect: null,
+  _timerInterval: null,
 
   init(elements, i18n) {
     this.vpnPolicyBanner = elements.vpnPolicyBanner;
     this.vpnPolicyText = elements.vpnPolicyText;
     this.refreshPolicyBtn = elements.refreshPolicyBtn;
     this.policyModeSelect = elements.policyModeSelect;
+    this.vpnTimerRow = elements.vpnTimerRow;
+    this.vpnTimerFill = elements.vpnTimerFill;
+    this.vpnTimerText = elements.vpnTimerText;
     this._i18n = i18n;
 
     this.refreshPolicyBtn.addEventListener('click', async () => {
@@ -46,11 +52,46 @@ const PopupGlobal = {
       this.vpnPolicyText.textContent = `VPN: On (${isProd ? 'prod' : 'dev'})`;
       this.policyModeSelect.value = isProd ? 'prod' : 'default';
       this.policyModeSelect.disabled = false;
+      this.startTimer().catch(() => {});
     } else {
       this.vpnPolicyBanner.className = 'vpn-policy-banner inactive';
       this.vpnPolicyText.textContent = 'VPN: Off';
       this.policyModeSelect.disabled = true;
+      this.stopTimer();
     }
+  },
+
+  async startTimer() {
+    this.stopTimer();
+    const data = await chrome.storage.local.get('vpnSessionStart');
+    const sessionStart = data.vpnSessionStart;
+    if (!sessionStart) {
+      this.vpnTimerRow.style.display = 'none';
+      return;
+    }
+    this.vpnTimerRow.style.display = 'flex';
+    const tick = () => {
+      const elapsed = Date.now() - sessionStart;
+      const remaining = Math.max(0, VPN_SESSION_DURATION - elapsed);
+      const pct = (remaining / VPN_SESSION_DURATION) * 100;
+
+      this.vpnTimerFill.style.width = pct + '%';
+
+      const totalMin = Math.ceil(remaining / 60000);
+      const h = Math.floor(totalMin / 60);
+      const m = totalMin % 60;
+      this.vpnTimerText.textContent = remaining <= 0 ? 'Expired' : `${h}h ${String(m).padStart(2, '0')}m`;
+    };
+    tick();
+    this._timerInterval = setInterval(tick, 30000);
+  },
+
+  stopTimer() {
+    if (this._timerInterval) {
+      clearInterval(this._timerInterval);
+      this._timerInterval = null;
+    }
+    if (this.vpnTimerRow) this.vpnTimerRow.style.display = 'none';
   },
 
   async checkPolicy() {

@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     vpnPolicyText: document.getElementById('vpnPolicyText'),
     refreshPolicyBtn: document.getElementById('refreshPolicyBtn'),
     policyModeSelect: document.getElementById('policyModeSelect'),
+    vpnTimerRow: document.getElementById('vpnTimerRow'),
+    vpnTimerFill: document.getElementById('vpnTimerFill'),
+    vpnTimerText: document.getElementById('vpnTimerText'),
     // Ivanti-specific
     toggleSwitch: document.getElementById('toggleSwitch'),
     forceMenloToggle: document.getElementById('forceMenloToggle'),
