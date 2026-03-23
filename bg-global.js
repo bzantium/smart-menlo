@@ -10,25 +10,26 @@ const checkVpnPolicy = async () => {
     if (response.ok) {
       const data = await response.json();
       const isProd = data.policy === 'prod';
+      vpnConnected = true;
       if (vpnPolicyProd !== isProd) {
         vpnPolicyProd = isProd;
         await chrome.storage.local.set({ vpnPolicyProd: isProd, vpnConnected: true, vpnPolicy: data.policy });
         log(`[Smart Menlo] VPN policy updated: ${data.policy} (auto-redirect: ${isProd ? 'ON' : 'OFF'})`);
-        updateBadge();
+      } else {
+        await chrome.storage.local.set({ vpnConnected: true, vpnPolicy: data.policy });
       }
+      updateBadge();
     } else {
-      if (vpnPolicyProd !== false) {
-        vpnPolicyProd = false;
-        await chrome.storage.local.set({ vpnPolicyProd: false, vpnConnected: false, vpnPolicy: '' });
-        updateBadge();
-      }
-    }
-  } catch (e) {
-    if (vpnPolicyProd !== false) {
+      vpnConnected = false;
       vpnPolicyProd = false;
       await chrome.storage.local.set({ vpnPolicyProd: false, vpnConnected: false, vpnPolicy: '' });
       updateBadge();
     }
+  } catch (e) {
+    vpnConnected = false;
+    vpnPolicyProd = false;
+    await chrome.storage.local.set({ vpnPolicyProd: false, vpnConnected: false, vpnPolicy: '' });
+    updateBadge();
   }
 };
 

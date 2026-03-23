@@ -15,6 +15,7 @@ let isEnabled = true;
 let forceMenloEnabledGlobal = true;
 let forceMenloEnabledIvanti = true;
 let vpnMode = 'global';
+let vpnConnected = false;
 
 const checkSessionFlag = async (tabId) => {
   const key = tabId.toString();
@@ -71,14 +72,10 @@ const updateBadge = () => {
   if (vpnMode === 'global') {
     if (vpnPolicyProd) {
       setIconWithDot('#4caf50');
+    } else if (vpnConnected) {
+      setIconWithDot('#42a5f5');
     } else {
-      chrome.storage.local.get(['vpnConnected'], (data) => {
-        if (data.vpnConnected) {
-          setIconWithDot('#42a5f5');
-        } else {
-          chrome.action.setIcon({ path: { 48: 'assets/icon48.png' } });
-        }
-      });
+      chrome.action.setIcon({ path: { 48: 'assets/icon48.png' } });
     }
   } else {
     chrome.action.setIcon({ path: { 48: 'assets/icon48.png' } });

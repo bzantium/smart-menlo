@@ -65,7 +65,8 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
       updateBadge();
     }
     if (changes.vpnConnected) {
-      log(`[Smart Menlo] vpnConnected updated to: ${changes.vpnConnected.newValue}`);
+      vpnConnected = changes.vpnConnected.newValue;
+      log(`[Smart Menlo] vpnConnected updated to: ${vpnConnected}`);
       updateBadge();
     }
     if (changes.isEnabled) {
@@ -121,9 +122,10 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 const loadInitialState = async () => {
   log('[Smart Menlo] Loading initial state.');
   try {
-    const data = await chrome.storage.local.get(['forceMenloList', 'vpnPolicyProd', 'isEnabled', 'forceMenloEnabledGlobal', 'forceMenloEnabledIvanti', 'vpnMode', 'vpnSwitching']);
+    const data = await chrome.storage.local.get(['forceMenloList', 'vpnPolicyProd', 'vpnConnected', 'isEnabled', 'forceMenloEnabledGlobal', 'forceMenloEnabledIvanti', 'vpnMode', 'vpnSwitching']);
     forceMenloList = data.forceMenloList || [];
     vpnPolicyProd = data.vpnPolicyProd || false;
+    vpnConnected = data.vpnConnected || false;
     isEnabled = data.isEnabled !== false;
     forceMenloEnabledGlobal = data.forceMenloEnabledGlobal !== false;
     forceMenloEnabledIvanti = data.forceMenloEnabledIvanti !== false;
