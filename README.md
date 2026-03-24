@@ -82,6 +82,7 @@ Designed for **Ivanti** VPN users.
 To get accurate VPN session remaining time, install the native helper:
 
 ```sh
+cd smart-menlo
 bash install.sh
 ```
 
