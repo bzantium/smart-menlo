@@ -43,17 +43,18 @@ const getIconBitmap = async () => {
   return _iconBitmapCache;
 };
 
-const renderIcon = async (color) => {
+const renderIcon = async (color, opacity = 1) => {
   const size = 48;
   const bitmap = await getIconBitmap();
   const canvas = new OffscreenCanvas(size, size);
   const ctx = canvas.getContext('2d');
   ctx.drawImage(bitmap, 0, 0, size, size);
 
-  if (color) {
+  if (color && opacity > 0) {
     const dotRadius = 10;
     const dotX = size - dotRadius - 2;
     const dotY = dotRadius + 2;
+    ctx.globalAlpha = opacity;
     ctx.beginPath();
     ctx.arc(dotX, dotY, dotRadius + 2, 0, Math.PI * 2);
     ctx.fillStyle = '#ffffff';
@@ -62,6 +63,7 @@ const renderIcon = async (color) => {
     ctx.arc(dotX, dotY, dotRadius, 0, Math.PI * 2);
     ctx.fillStyle = color;
     ctx.fill();
+    ctx.globalAlpha = 1;
   }
 
   const imageData = ctx.getImageData(0, 0, size, size);
@@ -77,14 +79,18 @@ const stopBlink = () => {
   }
 };
 
-const startBlink = (color, intervalMs) => {
+const startBlink = (color, cycleMs) => {
   stopBlink();
-  let visible = true;
+  const stepMs = 80;
+  const steps = Math.round(cycleMs / stepMs);
+  let tick = 0;
   renderIcon(color);
   _blinkInterval = setInterval(() => {
-    visible = !visible;
-    renderIcon(visible ? color : null);
-  }, intervalMs);
+    tick = (tick + 1) % steps;
+    // sine wave: 1 → 0.15 → 1
+    const opacity = 0.15 + 0.85 * (0.5 + 0.5 * Math.cos(2 * Math.PI * tick / steps));
+    renderIcon(color, opacity);
+  }, stepMs);
 };
 
 const updateBadge = async () => {
